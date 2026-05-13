@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../../../services/api';
 import { 
-  HiOutlineArrowLeft, HiOutlinePlus, HiOutlineBookOpen, 
+  HiOutlineArrowLeft, HiOutlinePlus, 
   HiOutlineTrash, HiOutlinePencilAlt, HiOutlinePlay,
   HiOutlineQuestionMarkCircle, HiX 
 } from 'react-icons/hi';

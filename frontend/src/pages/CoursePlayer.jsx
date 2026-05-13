@@ -7,7 +7,7 @@ import {
   HiOutlineChevronLeft, 
   HiCheckCircle, 
   HiPlay, 
-  HiOutlineDownload, 
+
   HiOutlineInformationCircle,
   HiOutlineQuestionMarkCircle,
   HiLockClosed 
@@ -150,9 +150,9 @@ const CoursePlayer = () => {
                   
                   <div className={`rounded-lg border border-gray-200 overflow-hidden bg-gray-900 ${isPDF(currentCours.contenu_url) ? 'h-[70vh]' : 'aspect-video'}`}>
                     {isYouTube(currentCours.contenu_url) ? (
-                      <iframe key={currentCours.id} className="w-full h-full" src={currentCours.contenu_url.replace("watch?v=", "embed/").split('&')[0]} allowFullScreen></iframe>
+                      <iframe title="Lecteur principal de la leçon vidéo" key={currentCours.id} className="w-full h-full" src={currentCours.contenu_url.replace("watch?v=", "embed/").split('&')[0]} allowFullScreen></iframe>
                     ) : isPDF(currentCours.contenu_url) ? (
-                      <iframe key={currentCours.id} src={`${currentCours.contenu_url}#toolbar=0`} className="w-full h-full bg-white"></iframe>
+                      <iframe title="Lecteur principal de la leçon vidéo" key={currentCours.id} src={`${currentCours.contenu_url}#toolbar=0`} className="w-full h-full bg-white"></iframe>
                     ) : (
                       <video key={currentCours.id} controls className="w-full h-full"><source src={currentCours.contenu_url} /></video>
                     )}

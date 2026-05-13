@@ -10,7 +10,7 @@ import {
   HiOutlineClipboardList,
   HiOutlineCreditCard,
   HiOutlineShieldCheck,
-  HiOutlineCog,
+
   HiOutlineLogout
 } from 'react-icons/hi';
 import { GrServices } from "react-icons/gr";

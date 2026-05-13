@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FaWhatsapp, FaArrowRight, FaEnvelope, FaCode, FaRobot, FaCloud, FaShieldAlt, FaMobileAlt, FaDatabase } from 'react-icons/fa';
-import { HiOutlineInformationCircle, HiX } from 'react-icons/hi';
+import { HiX } from 'react-icons/hi';
 
 const ServicesSection = () => {
   const [services, setServices] = useState([]);
@@ -42,15 +42,7 @@ const ServicesSection = () => {
     return colors[color] || 'bg-gray-600';
   };
 
-  const getBorderColorClass = (color) => {
-    const colors = {
-      blue: 'border-blue-200',
-      green: 'border-green-200',
-      orange: 'border-orange-200',
-      purple: 'border-purple-200'
-    };
-    return colors[color] || 'border-gray-200';
-  };
+
 
   const scrollToContact = () => {
     const contactSection = document.getElementById('contact');

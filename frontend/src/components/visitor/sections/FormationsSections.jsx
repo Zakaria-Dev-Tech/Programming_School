@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { 
-  HiOutlineClock, HiStar, HiOutlineBookOpen, HiArrowRight, 
-  HiOutlineInformationCircle, HiX 
+  HiOutlineClock,  HiOutlineBookOpen, HiArrowRight, 
+   HiX 
 } from 'react-icons/hi';
 import { FaUserPlus, FaBookOpen, FaCreditCard, FaAward } from 'react-icons/fa';
 import api from '../../../services/api'; 

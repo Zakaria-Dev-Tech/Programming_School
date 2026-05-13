@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
-  HiOutlineMenu, HiOutlineX, HiOutlineBookOpen,HiOutlineChartBar,
-  HiOutlineUsers, HiOutlineLogout, HiChevronRight,HiOutlineAcademicCap,HiOutlineUserCircle
+  HiOutlineMenu,HiOutlineBookOpen,HiOutlineChartBar,
+  HiOutlineLogout, HiChevronRight,HiOutlineAcademicCap,HiOutlineUserCircle
 } from 'react-icons/hi';
+import { useAuth } from '../../../contexts/AuthContext';
 
 const SidebarApprenant = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [userData, setUserData] = useState({ name: 'Apprenant' });
+  const { setUserData } = useAuth();
   const location = useLocation();
 
   useEffect(() => {
@@ -31,7 +32,7 @@ const SidebarApprenant = () => {
     checkScreenSize();
     window.addEventListener('resize', checkScreenSize);
     return () => window.removeEventListener('resize', checkScreenSize);
-  }, []);
+  }, [setUserData]);
 
   const handleLogout = () => {
     localStorage.removeItem('user');
