@@ -26,5 +26,5 @@ RUN composer install --no-dev --optimize-autoloader
 
 # Attribution des permissions pour les dossiers de cache et de stockage de Laravel
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-
+RUN php artisan storage:link
 EXPOSE 80
