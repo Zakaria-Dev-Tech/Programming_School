@@ -1,8 +1,9 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
+// Configuration de la baseURL modifiée avec l'adresse du cloud Render
 const api = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api',
+  baseURL: 'https://pschool-backend.onrender.com/api',
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
@@ -79,13 +80,13 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // 4. CORRECTION : Connexion via QR Code (Badge)
+  // 4. Connexion via QR Code (Badge)
   const loginWithToken = async (token) => {
     try {
       // Appel au backend avec le token du badge
       const response = await api.post('/auth/login-badge', { token });
       
-      // Extraction des données (ajout de .data pour Axios)
+      // Extraction des données
       const { user: userData, access_token } = response.data;
 
       if (access_token) {
