@@ -17,11 +17,10 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [
-        'http://localhost:3000',
-        'http://127.0.0.1:8000',
-        'https://pschool-vitrine.onrender.com', // Ta vitrine Render
-    ],
+ 'allowed_origins' => [
+    'http://localhost:3000',
+    'https://pschool-vitrine.onrender.com', 
+],
 
     'allowed_origins_patterns' => [],
 
