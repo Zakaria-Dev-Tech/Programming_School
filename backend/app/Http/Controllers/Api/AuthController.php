@@ -78,7 +78,11 @@ class AuthController extends Controller
     if (!$user || !Hash::check($request->password, $user->password)) {
         return response()->json(['message' => 'email ou username ou mot de passe incorrect'], 401);
     }
-
+    if ($user->statut === 'inactif') {
+        return response()->json([
+            'message' => 'Votre compte est actuellement inactif ou suspendu. Veuillez contacter l\'administration de P.School.'
+        ], 403);
+    }
     $token = $user->createToken('auth_token')->plainTextToken;
 
     return response()->json([

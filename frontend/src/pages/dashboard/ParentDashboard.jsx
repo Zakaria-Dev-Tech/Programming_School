@@ -2,7 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import ParentLayout from '../../components/dashboard/common/ParentLayout';
 import MesEnfants from '../../components/dashboard/parent/MesEnfants';
 import ProfilParent from '../../components/dashboard/parent/ProfilParent';
-
+import ParentPaiements from '../../components/dashboard/parent/ParentPaiements';
 const ParentDashboard = () => {
   console.log("Dashboard Parent chargé avec Layout"); // Pour vérifier dans la console F12
 
@@ -17,7 +17,7 @@ const ParentDashboard = () => {
   <Route path="profil" element={<ProfilParent />} /> 
   
   {/* PAREIL ICI */}
-  <Route path="paiements" element={<paiements />} />
+  <Route path="paiements" element={<ParentPaiements />} />
 </Routes>
     </ParentLayout>
   );

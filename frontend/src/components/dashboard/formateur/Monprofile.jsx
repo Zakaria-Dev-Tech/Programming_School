@@ -144,7 +144,7 @@ const MonProfile = () => {
               </div>
             </div>
 
-            {/* Champ Téléphone Rajouté ICI */}
+            {/* Champ Téléphone  */}
             <div className="space-y-1">
               <label className="text-[10px] font-semibold text-slate-400 uppercase ml-1 tracking-wider">Téléphone</label>
               <div className="relative">

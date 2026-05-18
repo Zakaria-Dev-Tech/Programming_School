@@ -4,35 +4,23 @@ import {
   HiOutlineMenu, HiOutlineCreditCard,
   HiOutlineUser, HiOutlineLogout, HiChevronRight
 } from 'react-icons/hi';
-import { useAuth } from '../../../contexts/AuthContext';
 
-const SidebarApprenant = () => {
+const SidebarParent = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const { setUserData } = useAuth();
   const location = useLocation();
 
   useEffect(() => {
-    const syncUser = () => {
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        try {
-          const user = JSON.parse(storedUser);
-          setUserData({ name: user.name || user.username || "Apprenant" });
-        } catch (e) { console.error(e); }
-      }
-    };
-    syncUser();
-
     const checkScreenSize = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
       setIsOpen(!mobile);
     };
+    
     checkScreenSize();
     window.addEventListener('resize', checkScreenSize);
     return () => window.removeEventListener('resize', checkScreenSize);
-  }, [setUserData]);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('user');
@@ -40,19 +28,18 @@ const SidebarApprenant = () => {
     window.location.href = '/';
   };
 
-const menuItems = [
-
+  const menuItems = [
     { path: '/parent', name: 'Inscrire mon enfant', icon: HiOutlineUser },
     { path: '/parent/paiements', name: 'Paiements', icon: HiOutlineCreditCard },
     { path: '/parent/profil', name: 'Mon profil', icon: HiOutlineUser },
-
   ];
+
   return (
     <>
-     {isMobile && !isOpen && (
+      {isMobile && !isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed top-4  z-50 p-4   rounded-none "
+          className="fixed top-4 z-50 p-4"
         >
           <HiOutlineMenu className="h-6 w-6 text-gray-600" />
         </button>
@@ -70,7 +57,7 @@ const menuItems = [
           <span className="text-[9px] uppercase tracking-[0.3em] text-emerald-600 font-bold">Espace Parent</span>
         </div>
 
-        {/* Navigation  */}
+        {/* Navigation */}
         <nav className="flex-1 px-4 py-8 space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
@@ -83,12 +70,13 @@ const menuItems = [
                 onClick={() => isMobile && setIsOpen(false)}
                 className={`flex items-center justify-between px-5 py-3 rounded-xl transition-all ${
                   isActive 
-                    ? 'bg-blue-50 text-blue-600 '
+                    ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-600 hover:bg-gray-100'
                 }`}
               >
                 <div className="flex items-center">
-                  <Icon className={`h-5 w-5 mr-3 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                  {/* Correction de la couleur de l'icône active pour qu'elle reste visible sur le fond bleu clair */}
+                  <Icon className={`h-5 w-5 mr-3 ${isActive ? 'text-blue-600' : 'text-slate-400'}`} />
                   <span className="text-sm font-medium tracking-tight">{item.name}</span>
                 </div>
                 {isActive && <HiChevronRight className="h-4 w-4 opacity-50" />}
@@ -116,4 +104,4 @@ const menuItems = [
   );
 };
 
-export default SidebarApprenant;
+export default SidebarParent; 

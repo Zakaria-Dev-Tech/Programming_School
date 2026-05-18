@@ -8,6 +8,7 @@ use App\Models\Formation;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 
 class InscriptionController extends Controller
@@ -16,7 +17,7 @@ class InscriptionController extends Controller
 public function index()
 {
     try {
-       
+        
         $inscriptions = Inscription::with(['user.parent', 'formation'])
             ->orderBy('id', 'desc')
             ->get()
@@ -45,14 +46,16 @@ public function index()
                     'date_inscription' => $ins->date_inscription ?? $ins->created_at,
                     'montant' => $ins->montant_paye ?? ($f ? $f->prix : 0),
                     'statut' => $ins->statut,
+                    'statut_paiement' => $ins->statut_paiement ?? 'essai',
                     'mode_paiement' => $ins->mode_paiement
+                    
                 ];
             });
 
         return response()->json($inscriptions);
 
     } catch (\Exception $e) {
-       
+        
         return response()->json([
             'error' => 'Erreur Serveur 500',
             'message' => $e->getMessage(),
@@ -98,8 +101,10 @@ public function index()
             'user_id' => auth()->id(),
             'formation_id' => $request->formation_id,
             'date_inscription' => now(),
-            'statut' => 'en_attente',
+           'statut' => 'confirmee',
+            'statut_paiement' => 'essai',
             'montant_paye' => $formation->prix,
+            
         ]);
 
         return response()->json([
@@ -156,7 +161,7 @@ public function valider($id)
     }
 
     // Supprimer une inscription (admin)
- public function destroy($id)
+public function destroy($id)
 {
     $realId = str_replace(['adulte_', 'enfant_'], '', $id);
 
@@ -171,6 +176,7 @@ public function valider($id)
     
     return response()->json(['message' => 'Inscription supprimée']);
 }
+
 public function getSuiviEnfant($enfantId)
 {
  
@@ -188,4 +194,50 @@ public function getSuiviEnfant($enfantId)
         'inscriptions' => $inscriptions
     ]);
 }
+
+    // AJOUT COMPTABLE POUR GESTIONPAIEMENTS.JSX
+    public function getAllTransactionsAdmin()
+    {
+        try {
+            $transactions = DB::table('inscriptions')
+                ->join('users', 'inscriptions.user_id', '=', 'users.id')
+                ->join('formations', 'inscriptions.formation_id', '=', 'formations.id')
+                ->select([
+                    'inscriptions.id',
+                    'users.nom as apprenant',
+                    'formations.titre as formation',
+                    'inscriptions.montant_paye as montant',
+                    'inscriptions.mode_paiement as mode',
+                    'inscriptions.updated_at as date',
+                    'inscriptions.statut_paiement as statut',
+                    'inscriptions.transaction_id as transactionId',
+                    'users.telephone as telephone'
+                ])
+                ->orderBy('inscriptions.updated_at', 'desc')
+                ->get()
+                ->map(function($item) {
+                    if ($item->statut === 'paye') {
+                        $item->statut = 'valide';
+                    }
+                    
+                    if (!$item->mode && $item->statut === 'essai') {
+                        $item->mode = 'essai';
+                    } elseif (!$item->mode) {
+                        $item->mode = 'orange_money';
+                    }
+
+                    if (!$item->transactionId) {
+                        $item->transactionId = 'N/A';
+                    }
+
+                    return $item;
+        });
+
+            return response()->json($transactions, 200);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
 }

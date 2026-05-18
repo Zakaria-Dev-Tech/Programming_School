@@ -119,7 +119,7 @@ const ModalCours = ({ isOpen, onClose, formationId, onRefresh, initialData }) =>
             />
           </div>
 
-          {/* Ordre et Statut sur la même ligne pour gagner de la place */}
+        
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-bold text-slate-700 mb-1.5">Ordre</label>

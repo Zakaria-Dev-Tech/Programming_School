@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { HiOutlineMail, HiOutlinePhone, HiOutlineLocationMarker } from 'react-icons/hi';
+import api from '../../../services/api'; 
 
 const ContactSection = () => {
   const [formData, setFormData] = useState({
@@ -24,12 +25,16 @@ const ContactSection = () => {
     setError('');
     
     try {
-      console.log('Message envoyé:', formData);
+      // Connexion réelle avec l'API Laravel
+      await api.post('/contact', formData);
+      
       setSubmitted(true);
+      // Réinitialisation du formulaire après succès
       setFormData({ nom: '', email: '', telephone: '', sujet: '', message: '' });
-      setTimeout(() => setSubmitted(false), 5000);
+      setTimeout(() => setSubmitted(false), 6000);
     } catch (err) {
-      setError('Une erreur est survenue. Veuillez réessayer.');
+      console.error("Erreur envoi contact:", err);
+      setError(err.response?.data?.message || 'Une erreur est survenue lors de l\'envoi. Veuillez réessayer.');
     } finally {
       setLoading(false);
     }
@@ -39,7 +44,6 @@ const ContactSection = () => {
     <section id="contact" className="py-16 bg-gray-50">
       <div className="max-w-6xl mx-auto px-5">
         
-        {/* En-tête de section */}
         <div className="mb-12 text-center">
           <span className="text-green-600 font-semibold text-sm uppercase tracking-wide">Contactez-nous</span>
           <h2 className="text-3xl font-bold text-gray-800 mt-2">
@@ -53,13 +57,13 @@ const ContactSection = () => {
           {/* Formulaire */}
           <div className="bg-white rounded-lg border border-gray-200 p-6">
             {submitted && (
-              <div className="mb-5 p-3 bg-green-50 text-green-700 rounded-md text-sm border border-green-200">
-                Message envoyé avec succès !
+              <div className="mb-5 p-3 bg-green-50 text-green-700 rounded-md text-sm border border-green-200 shadow-sm">
+                Message envoyé avec succès ! L'équipe P.School vous répondra très rapidement.
               </div>
             )}
             
             {error && (
-              <div className="mb-5 p-3 bg-red-50 text-red-700 rounded-md text-sm border border-red-200">
+              <div className="mb-5 p-3 bg-red-50 text-red-700 rounded-md text-sm border border-red-200 shadow-sm">
                 {error}
               </div>
             )}
@@ -67,7 +71,7 @@ const ContactSection = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nom complet *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nom complet <span className='text-red-600'>*</span> </label>
                   <input
                     type="text"
                     name="nom"
@@ -79,7 +83,7 @@ const ContactSection = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email <span className='text-red-600'>*</span></label>
                   <input
                     type="email"
                     name="email"
@@ -93,7 +97,7 @@ const ContactSection = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Téléphone *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Téléphone Whatsapp <span className='text-red-600'>*</span></label>
                 <input
                   type="tel"
                   name="telephone"
@@ -101,12 +105,12 @@ const ContactSection = () => {
                   value={formData.telephone}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-colors"
-                  placeholder="+226 XX XX XX XX"
+                  placeholder="Ex : +226 XX XX XX XX"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Sujet *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Sujet <span className='text-red-600'>*</span></label>
                 <input
                   type="text"
                   name="sujet"
@@ -119,7 +123,7 @@ const ContactSection = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Message *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Message <span className='text-red-600'>*</span></label>
                 <textarea
                   name="message"
                   rows="4"
@@ -141,9 +145,8 @@ const ContactSection = () => {
             </form>
           </div>
 
-          {/*  Infos + Maps */}
+          {/* Infos + Maps */}
           <div className="space-y-5">
-            {/* Cartes d'infos rapides */}
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="p-5 bg-white rounded-lg border border-gray-200">
                 <HiOutlinePhone className="w-6 h-6 text-green-600 mb-2" />
@@ -158,7 +161,6 @@ const ContactSection = () => {
               </div>
             </div>
 
-            {/* Localisation & Maps */}
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
               <div className="p-5 flex items-start gap-3 border-b border-gray-200">
                 <HiOutlineLocationMarker className="w-5 h-5 text-green-600 mt-0.5" />
@@ -168,7 +170,6 @@ const ContactSection = () => {
                 </div>
               </div>
               
-              {/* Carte Google Maps */}
               <div className="h-64 w-full">
                 <iframe 
                   title="P.School Location"

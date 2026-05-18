@@ -24,7 +24,7 @@ const VideoModal = ({ isOpen, onClose, cours }) => {
           </div>
 
           <div className="flex items-center gap-2 md:gap-4">
-            {/* Bouton Télécharger (Visible pour PDF et Vidéo) */}
+            {/* Bouton Télécharger */}
             <a 
               href={cours.contenu_url} 
               target="_blank" 
@@ -50,7 +50,7 @@ const VideoModal = ({ isOpen, onClose, cours }) => {
         <div className={`w-full flex items-center justify-center bg-slate-950 ${isPDF ? 'h-full pt-20' : 'aspect-video'}`}>
           {isPDF ? (
             <iframe 
-              // #toolbar=0 masque la barre d'outils grise sur Chrome/Edge
+         
               src={`${cours.contenu_url}#toolbar=0&navpanes=0`} 
               className="w-full h-full border-none"
               title={cours.titre}

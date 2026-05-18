@@ -13,14 +13,15 @@ import {
 
   HiOutlineLogout
 } from 'react-icons/hi';
+import { TiMessage } from "react-icons/ti";
 import { GrServices } from "react-icons/gr";
-// 2. Définition des variantes pour la cascade
+
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.2, // Délai entre chaque item
+      staggerChildren: 0.2, 
     },
   },
 };
@@ -68,6 +69,7 @@ const Sidebar = () => {
     { path: '/admin/services', name: 'Services', icon: GrServices },
     { path: '/admin/inscriptions', name: 'Inscriptions', icon: HiOutlineClipboardList },
     { path: '/admin/paiements', name: 'Paiements', icon: HiOutlineCreditCard },
+      { path: '/admin/messages', name: 'Renseignement', icon: TiMessage },
     { path: '/admin/logs', name: 'Logs sécurité', icon: HiOutlineShieldCheck },
       { path: '/admin/profil', name: 'Profil', icon: HiOutlineUsers },
    

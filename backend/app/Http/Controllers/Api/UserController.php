@@ -86,18 +86,24 @@ public function update(Request $request, $id)
         return response()->json(['message' => 'Utilisateur non trouvé'], 404);
     }
     
-    
-    
+    // 1. Mise à jour des informations de base
     $user->nom = $request->name ?? $request->nom ?? $user->nom;
     $user->email = $request->email ?? $user->email;
     $user->telephone = $request->telephone ?? $user->telephone;
     $user->statut = $request->statut ?? $user->statut;
 
-   
-    if ($request->has('role') || $request->has('type')) {
-        $user->type = $request->role ?? $request->type;
+    // 2. CORRECTION CRUCIALE : Attribution des bonnes clés aux bonnes colonnes
+    // Le 'type' reçoit le métier (apprenant, parent, formateur)
+    if ($request->has('type')) {
+        $user->type = $request->type;
     }
     
+    // Le 'role' reçoit les privilèges d'accès (admin, user)
+    if ($request->has('role')) {
+        $user->role = $request->role;
+    }
+    
+    // 3. Gestion du mot de passe s'il est fourni
     if ($request->filled('password')) {
         $user->password = Hash::make($request->password);
     }

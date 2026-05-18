@@ -89,7 +89,7 @@ const GestionInscriptions = () => {
     return matchRecherche && matchStatut;
   });
 
-  // Couleurs des badges
+  // Couleurs des badges du Dossier
   const getStatutColor = (statut) => {
     switch(statut) {
       case 'confirmee': return 'bg-green-100 text-green-700';
@@ -110,12 +110,26 @@ const GestionInscriptions = () => {
     }
   };
 
- const getPaiementColor = (ins) => {
-  // Le paiement n'est considéré "Validé" que si l'inscription est "confirmee"
-  return ins.statut === 'confirmee' || ins.statut === 'terminee' 
-    ? 'bg-green-100 text-green-700' 
-    : 'bg-orange-100 text-orange-700';
-};
+  // NOUVEAU : Gestion dynamique des couleurs de la colonne CinetPay
+  const getPaiementColor = (statutPaiement) => {
+    switch(statutPaiement) {
+      case 'paye': return 'bg-green-100 text-green-700';
+      case 'essai': return 'bg-blue-100 text-blue-700';
+      case 'en_attente': return 'bg-orange-100 text-orange-700';
+      default: return 'bg-gray-100 text-gray-700';
+    }
+  };
+
+  // NOUVEAU : Gestion dynamique des libellés financiers
+  const getPaiementLabel = (statutPaiement) => {
+    switch(statutPaiement) {
+      case 'paye': return 'Payé (CinetPay)';
+      case 'essai': return 'Essai Gratuit';
+      case 'en_attente': return 'En attente';
+      default: return statutPaiement || 'Essai Gratuit';
+    }
+  };
+
   // Formater la date
   const formatDate = (date) => {
     if (!date) return '-';
@@ -137,7 +151,7 @@ const GestionInscriptions = () => {
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Gestion des Inscriptions</h1>
           <p className="text-gray-500 text-sm mt-1">
-            Gérez toutes les inscriptions aux formations
+            Gerez toutes les inscriptions aux formations
           </p>
         </div>
         <div className="text-sm text-gray-500">
@@ -227,12 +241,12 @@ const GestionInscriptions = () => {
                         {getStatutLabel(ins.statut)}
                       </span>
                     </td>
-                   <td className="p-4">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPaiementColor(ins)}`}>
-                    
-                      {ins.statut === 'confirmee' || ins.statut === 'terminee' ? ' Validé' : ' En attente'}
-                    </span>
-                  </td>
+                    {/* MODIFIÉ : Utilisation directe du vrai champ statut_paiement de Laravel */}
+                    <td className="p-4">
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getPaiementColor(ins.statut_paiement)}`}>
+                        {getPaiementLabel(ins.statut_paiement)}
+                      </span>
+                    </td>
                     <td className="p-4">
                       <div className="flex justify-center gap-2">
                         <button 
@@ -277,146 +291,149 @@ const GestionInscriptions = () => {
         )}
       </div>
 
-     {/* Modale des détails */}
-{modalDetailsOuverte && inscriptionSelectionnee && (
-  <div className="fixed inset-0 z-50 overflow-y-auto">
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setModalDetailsOuverte(false)}></div>
-    <div className="relative min-h-screen flex items-center justify-center p-4">
-      <div className="relative bg-white rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in duration-300">
-        
-        {/* En-tête de la Modale */}
-        <div className="flex items-center justify-between p-6 border-b bg-gray-50/50">
-          <div>
-            <h2 className="text-xl font-black text-slate-900 uppercase tracking-tighter">Détails Inscription</h2>
-            <p className="text-[10px] text-blue-600 font-bold uppercase tracking-widest">Référence #{inscriptionSelectionnee.id}</p>
-          </div>
-          <button 
-            onClick={() => setModalDetailsOuverte(false)} 
-            className="p-2 rounded-xl bg-white border shadow-sm hover:text-red-500 transition-colors"
-          >
-            <HiOutlineX className="h-6 w-6" />
-          </button>
-        </div>
-
-        <div className="p-8 space-y-6">
-          
-          {/* Section Apprenant & Formation */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-[10px] text-gray-400 uppercase font-black tracking-widest">Apprenant</label>
-              <p className="font-bold text-slate-900 text-lg leading-tight uppercase">{inscriptionSelectionnee.apprenant_nom}</p>
-            </div>
-            <div className="text-right">
-              <label className="text-[10px] text-gray-400 uppercase font-black tracking-widest">Type</label>
-              <div>
-                <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${
-                  inscriptionSelectionnee.apprenant_type === 'enfant' ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'
-                }`}>
-                  {inscriptionSelectionnee.apprenant_type}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* BLOC SPÉCIFIQUE ENFANT (S'affiche uniquement pour le type enfant) */}
-            {inscriptionSelectionnee.apprenant_type === 'enfant' && (
-          <div className="bg-blue-50/50 rounded-[1.5rem] border border-blue-100 p-6 space-y-5">
-            
-            {/* Infos Personnelles & Niveau */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-[9px] text-blue-500 uppercase font-black tracking-widest">Âge de l'élève</label>
-                <p className="font-bold text-slate-800">{inscriptionSelectionnee.apprenant_age || '--'} ans</p>
-              </div>
-              <div className="text-right">
-                <label className="text-[9px] text-blue-500 uppercase font-black tracking-widest">Niveau d'études</label>
-                <p className="font-bold text-slate-800">{inscriptionSelectionnee.apprenant_niveau || 'N/A'}</p>
-              </div>
-            </div>
-
-            {/* Infos Établissement (Scolarité) */}
-            <div className="pt-3 border-t border-blue-100/50">
-              <div className="grid grid-cols-2 gap-4">
+      {/* Modale des détails */}
+      {modalDetailsOuverte && inscriptionSelectionnee && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setModalDetailsOuverte(false)}></div>
+          <div className="relative min-h-screen flex items-center justify-center p-4">
+            <div className="relative bg-white rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in duration-300">
+              
+              {/* En-tête de la Modale */}
+              <div className="flex items-center justify-between p-6 border-b bg-gray-50/50">
                 <div>
-                  <label className="text-[9px] text-blue-500 uppercase font-black tracking-widest">Établissement</label>
-                  <p className="font-bold text-slate-800 text-sm leading-tight">
-                    {inscriptionSelectionnee.apprenant_nom_ecole || 'Non renseigné'}
-                  </p>
+                  <h2 className="text-xl font-black text-slate-900 uppercase tracking-tighter">Détails Inscription</h2>
+                  <p className="text-[10px] text-blue-600 font-bold uppercase tracking-widest">Référence #{inscriptionSelectionnee.id}</p>
                 </div>
-                <div className="text-right">
-                  <label className="text-[9px] text-blue-500 uppercase font-black tracking-widest">Localité</label>
-                  <p className="font-bold text-slate-800 text-sm">
-                    {inscriptionSelectionnee.apprenant_localite_ecole || 'Non précisée'}
-                  </p>
+                <button 
+                  onClick={() => setModalDetailsOuverte(false)} 
+                  className="p-2 rounded-xl bg-white border shadow-sm hover:text-red-500 transition-colors"
+                >
+                  <HiOutlineX className="h-6 w-6" />
+                </button>
+              </div>
+
+              <div className="p-8 space-y-6">
+                
+                {/* Section Apprenant & Formation */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] text-gray-400 uppercase font-black tracking-widest">Apprenant</label>
+                    <p className="font-bold text-slate-900 text-lg leading-tight uppercase">{inscriptionSelectionnee.apprenant_nom}</p>
+                  </div>
+                  <div className="text-right">
+                    <label className="text-[10px] text-gray-400 uppercase font-black tracking-widest">Type</label>
+                    <div>
+                      <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${
+                        inscriptionSelectionnee.apprenant_type === 'enfant' ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'
+                      }`}>
+                        {inscriptionSelectionnee.apprenant_type}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* BLOC SPÉCIFIQUE ENFANT */}
+                {inscriptionSelectionnee.apprenant_type === 'enfant' && (
+                  <div className="bg-blue-50/50 rounded-[1.5rem] border border-blue-100 p-6 space-y-5">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-[9px] text-blue-500 uppercase font-black tracking-widest">Âge de l'élève</label>
+                        <p className="font-bold text-slate-800">{inscriptionSelectionnee.apprenant_age || '--'} ans</p>
+                      </div>
+                      <div className="text-right">
+                        <label className="text-[9px] text-blue-500 uppercase font-black tracking-widest">Niveau d'études</label>
+                        <p className="font-bold text-slate-800">{inscriptionSelectionnee.apprenant_niveau || 'N/A'}</p>
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-blue-100/50">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-[9px] text-blue-500 uppercase font-black tracking-widest">Établissement</label>
+                          <p className="font-bold text-slate-800 text-sm leading-tight">
+                            {inscriptionSelectionnee.apprenant_nom_ecole || 'Non renseigné'}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <label className="text-[9px] text-blue-500 uppercase font-black tracking-widest">Localité</label>
+                          <p className="font-bold text-slate-800 text-sm">
+                            {inscriptionSelectionnee.apprenant_localite_ecole || 'Non précisée'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-blue-200/50">
+                      <div className="flex items-center justify-between bg-white/60 p-3 rounded-xl border border-blue-100">
+                        <div>
+                          <label className="text-[9px] text-orange-600 uppercase font-black tracking-widest">Parent Responsable</label>
+                          <p className="font-black text-slate-900 uppercase text-xs mt-0.5">
+                            {inscriptionSelectionnee.parent_nom || "N/A"}
+                          </p>
+                        </div>
+                        <div className="h-8 w-8 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center">
+                          <span className="text-[10px] font-black">P</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Détails Formation & Finance */}
+                <div className="space-y-4 pt-2">
+                  <div className="flex justify-between items-center py-3 border-b border-gray-100">
+                    <span className="text-sm text-gray-500 font-medium">Formation choisie</span>
+                    <span className="text-sm font-bold text-slate-900">{inscriptionSelectionnee.formation_titre}</span>
+                  </div>
+
+                  <div className="flex justify-between items-center py-3 border-b border-gray-100">
+                    <span className="text-sm text-gray-500 font-medium">Date d'inscription</span>
+                    <span className="text-sm font-bold text-slate-900">{formatDate(inscriptionSelectionnee.date_inscription)}</span>
+                  </div>
+
+                  <div className="flex justify-between items-center py-3 border-b border-gray-100">
+                    <span className="text-sm text-gray-500 font-medium">Montant total</span>
+                    <span className="text-lg font-black text-green-600">{formatPrix(inscriptionSelectionnee.montant)}</span>
+                  </div>
+
+                  {/* AJOUTÉ : Statut financier CinetPay dans la modale de détails */}
+                  <div className="flex justify-between items-center py-3 border-b border-gray-100">
+                    <span className="text-sm text-gray-500 font-medium">Statut du paiement</span>
+                    <span className={`px-3 py-1 rounded-xl text-[10px] font-bold uppercase tracking-wider ${getPaiementColor(inscriptionSelectionnee.statut_paiement)}`}>
+                      {getPaiementLabel(inscriptionSelectionnee.statut_paiement)}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-center py-3">
+                    <span className="text-sm text-gray-500 font-medium">État du dossier</span>
+                    <span className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest ${getStatutColor(inscriptionSelectionnee.statut)}`}>
+                      {getStatutLabel(inscriptionSelectionnee.statut)}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Section Parent Responsable */}
-            <div className="pt-3 border-t border-blue-200/50">
-              <div className="flex items-center justify-between bg-white/60 p-3 rounded-xl border border-blue-100">
-                <div>
-                  <label className="text-[9px] text-orange-600 uppercase font-black tracking-widest">Parent Responsable</label>
-                  <p className="font-black text-slate-900 uppercase text-xs mt-0.5">
-                    {inscriptionSelectionnee.parent_nom || "N/A"}
-                  </p>
-                </div>
-                <div className="h-8 w-8 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center">
-                    <span className="text-[10px] font-black">P</span>
-                </div>
+              {/* Pied de Modale */}
+              <div className="p-6 bg-gray-50 flex gap-3">
+                <button
+                  onClick={() => setModalDetailsOuverte(false)}
+                  className="flex-1 px-6 py-3 bg-white border-2 border-gray-200 text-gray-600 rounded-2xl font-bold text-sm hover:bg-gray-100 transition"
+                >
+                  Fermer
+                </button>
+                {inscriptionSelectionnee.statut === 'en_attente' && (
+                  <button
+                    onClick={() => { handleValider(inscriptionSelectionnee.id); setModalDetailsOuverte(false); }}
+                    className="flex-1 px-6 py-3 bg-slate-900 text-white rounded-2xl font-bold text-sm hover:bg-black transition shadow-lg shadow-slate-200"
+                  >
+                    Valider maintenant
+                  </button>
+                )}
               </div>
-            </div>
-            
-          </div>
-        )}
-
-          {/* Détails Formation & Finance */}
-          <div className="space-y-4 pt-2">
-            <div className="flex justify-between items-center py-3 border-b border-gray-100">
-              <span className="text-sm text-gray-500 font-medium">Formation choisie</span>
-              <span className="text-sm font-bold text-slate-900">{inscriptionSelectionnee.formation_titre}</span>
-            </div>
-
-            <div className="flex justify-between items-center py-3 border-b border-gray-100">
-              <span className="text-sm text-gray-500 font-medium">Date d'inscription</span>
-              <span className="text-sm font-bold text-slate-900">{formatDate(inscriptionSelectionnee.date_inscription)}</span>
-            </div>
-
-            <div className="flex justify-between items-center py-3 border-b border-gray-100">
-              <span className="text-sm text-gray-500 font-medium">Montant total</span>
-              <span className="text-lg font-black text-green-600">{formatPrix(inscriptionSelectionnee.montant)}</span>
-            </div>
-
-            <div className="flex justify-between items-center py-3">
-              <span className="text-sm text-gray-500 font-medium">État du dossier</span>
-              <span className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest ${getStatutColor(inscriptionSelectionnee.statut)}`}>
-                {getStatutLabel(inscriptionSelectionnee.statut)}
-              </span>
             </div>
           </div>
         </div>
-
-        {/* Pied de Modale */}
-        <div className="p-6 bg-gray-50 flex gap-3">
-          <button
-            onClick={() => setModalDetailsOuverte(false)}
-            className="flex-1 px-6 py-3 bg-white border-2 border-gray-200 text-gray-600 rounded-2xl font-bold text-sm hover:bg-gray-100 transition"
-          >
-            Fermer
-          </button>
-          {inscriptionSelectionnee.statut === 'en_attente' && (
-            <button
-              onClick={() => { handleValider(inscriptionSelectionnee.id); setModalDetailsOuverte(false); }}
-              className="flex-1 px-6 py-3 bg-slate-900 text-white rounded-2xl font-bold text-sm hover:bg-black transition shadow-lg shadow-slate-200"
-            >
-              Valider maintenant
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
-  </div>
-)}
+      )}
 
       {/* Modale de confirmation de suppression */}
       <ConfirmationSuppression 
@@ -424,7 +441,7 @@ const GestionInscriptions = () => {
         onClose={() => setSuppressionOuverte(false)}
         onConfirm={handleSupprimerConfirmer}
         formationTitre={inscriptionASupprimer?.formation_titre}
-         type="cet apprenant"
+        type="cet apprenant"
       />
     </div>
   );

@@ -122,11 +122,11 @@ const ModaleFormation = ({ isOpen, onClose, onSave, formationAModifier, formateu
               value={formData.statut}
               onChange={(e) => setFormData({...formData, statut: e.target.value})}
               className={`text-xs font-black uppercase tracking-widest px-3 py-1.5 rounded-lg outline-none cursor-pointer transition-colors ${
-                formData.statut === 'actif' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'
+                formData.statut === 'actif' ? '' : ''
               }`}
             >
-              <option value="actif">Actif (En ligne)</option>
-              <option value="inactif">Inactif (Masqué)</option>
+              <option value="actif">Actif </option>
+              <option value="inactif">Inactif </option>
             </select>
           </div>
 

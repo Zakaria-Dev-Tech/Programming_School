@@ -129,7 +129,7 @@ public function getContenuPourApprenant($formationId)
     try {
         $userId = auth()->id();
 
-       
+        // 1. Récupérer l'inscription avec les nouveaux champs de notre migration
         $inscription = DB::table('inscriptions')
             ->where('user_id', $userId)
             ->where('formation_id', $formationId)
@@ -138,11 +138,12 @@ public function getContenuPourApprenant($formationId)
         if (!$inscription) {
             return response()->json(['message' => 'Inscription non trouvée'], 403);
         }
+        
         $dernierCoursFini = DB::table('cours_completions')
-        ->where('user_id', $userId)
-        ->where('formation_id', $formationId)
-        ->orderBy('created_at', 'desc')
-        ->first();
+            ->where('user_id', $userId)
+            ->where('formation_id', $formationId)
+            ->orderBy('created_at', 'desc')
+            ->first();
      
         $cours = DB::table('cours')
             ->where('formation_id', $formationId)
@@ -150,15 +151,19 @@ public function getContenuPourApprenant($formationId)
             ->orderBy('ordre', 'asc')
             ->get();
 
+        // 2. Retourner les données complètes à React
         return response()->json([
             'cours' => $cours,
             'progression' => $inscription->progression ?? 0,
             'formation_nom' => DB::table('formations')->where('id', $formationId)->value('titre'),
-            'dernier_cours_id' => $dernierCoursFini ? $dernierCoursFini->cours_id : null
+            'dernier_cours_id' => $dernierCoursFini ? $dernierCoursFini->cours_id : null,
+            
+            // AJOUTS POUR LE PAYWALL REQUIS PAR LE COMPOSANT REACT :
+            'statut_paiement' => $inscription->statut_paiement ?? 'essai', // Valeur par défaut si nul
+            'formation_prix' => $inscription->montant ?? 150000          // Prix enregistré lors de l'inscription
         ]);
 
     } catch (\Exception $e) {
-        
         return response()->json(['error' => 'Erreur SQL: ' . $e->getMessage()], 500);
     }
 }

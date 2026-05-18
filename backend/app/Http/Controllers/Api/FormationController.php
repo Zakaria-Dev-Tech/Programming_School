@@ -10,24 +10,24 @@ use Illuminate\Support\Facades\Storage;
 
 class FormationController extends Controller
 {
-    
-    public function index(Request $request)
+public function index(Request $request)
 {
-    // On crée la requête de base
     $query = Formation::query();
 
-    // Si le paramètre 'cible' est présent dans l'URL (ex: ?cible=enfant)
+
+    if ($request->get('mode') === 'vitrine') {
+        $query->where('statut', 'actif');
+    }
+
+    // Filtre optionnel par public cible
     if ($request->has('cible')) {
         $query->where('public_cible', $request->cible);
     }
 
-    // On retourne les résultats filtrés
-    return response()->json($query->get());
+    // Retourne les formations triées (les plus récentes en premier)
+    return response()->json($query->orderBy('id', 'desc')->get());
 }
-
-    /**
-     * Enregistre une nouvelle formation avec son statut
-     */
+    //Crée une nouvelle formation
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -39,7 +39,7 @@ class FormationController extends Controller
             'categorie' => 'required|string',
             'public_cible' => 'required|string',
             'formateur_id' => 'nullable|integer',
-            'statut' => 'required|in:actif,inactif', // Validation du nouveau champ
+            'statut' => 'required|in:actif,inactif', 
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
@@ -62,9 +62,8 @@ class FormationController extends Controller
         ], 201);
     }
 
-    /**
-     * Met à jour une formation (incluant le changement de statut)
-     */
+    //Met à jour une formation (incluant le changement de statut)
+     
     public function update(Request $request, $id)
     {
         $formation = Formation::findOrFail($id);
@@ -85,17 +84,16 @@ class FormationController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // On prend toutes les données sauf l'image pour le moment
         $data = $request->except('image'); 
 
         if ($request->hasFile('image')) {
-            // 1. Supprimer l'ancienne image physiquement
+            // Supprimer l'ancienne image physiquement
             if ($formation->image) {
                 $oldPath = str_replace(asset('storage/'), '', $formation->image);
                 Storage::disk('public')->delete($oldPath);
             }
             
-            // 2. Stocker la nouvelle
+            // Stocker la nouvelle
             $path = $request->file('image')->store('formations', 'public');
             $data['image'] = asset('storage/' . $path);
         }
@@ -108,9 +106,8 @@ class FormationController extends Controller
         ], 200);
     }
 
-    /**
-     * Supprime une formation
-     */
+    //Supprime une formation
+     
     public function destroy($id)
     {
         $formation = Formation::find($id);
@@ -124,29 +121,37 @@ class FormationController extends Controller
         }
         return response()->json(['message' => 'Non trouvée'], 404);
     }
+
+    //Affiche les détails d'une formation spécifique
+     
     public function show($id)
     {
-        
         $formation = Formation::find($id);
 
-        
         if (!$formation) {
             return response()->json(['message' => 'Formation non trouvée'], 404);
         }
 
-       
+        // Sécurité supplémentaire : si un visiteur lambda essaie d'accéder à une formation masquée via l'URL directement
+        if ($formation->statut === 'inactif' && !auth()->check()) {
+            return response()->json(['message' => 'Cette formation n\'est pas accessible au public.'], 403);
+        }
+
         return response()->json($formation, 200);
     }
-    public function getFormateurFormations()
-{
-    // auth()->id() récupère l'ID du formateur connecté via le token
-    $formations = Formation::where('formateur_id', auth()->id())->get();
 
-    return response()->json($formations, 200);
-}
-public function cours()
-{
-    // Permet de faire $formation->cours pour obtenir la liste
-    return $this->hasMany(Cours::class)->orderBy('ordre', 'asc');
-}
+    
+     //Liste des formations d'un formateur spécifique
+     
+    public function getFormateurFormations()
+    {
+        $formations = Formation::where('formateur_id', auth()->id())->get();
+        return response()->json($formations, 200);
+    }
+
+  
+    public function cours()
+    {
+        return $this->hasMany(Cours::class)->orderBy('ordre', 'asc');
+    }
 }

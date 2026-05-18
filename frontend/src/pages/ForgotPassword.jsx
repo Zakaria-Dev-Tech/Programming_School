@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
 const ForgotPassword = () => {
-  const [step, setStep] = useState(1); // Étape 1, 2 ou 3
+  const [step, setStep] = useState(1); 
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
@@ -11,29 +11,29 @@ const ForgotPassword = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // ÉTAPE 1 : Envoyer l'email
+  //  Envoyer l'email
 const handleSendCode = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-        // C'est ici que ça se joue : il faut passer la méthode et le body
+       
         await api.request('/password/send-code', {
-            method: 'POST', // <-- OBLIGATOIRE
-            body: JSON.stringify({ email }) // <-- On transforme l'objet en texte JSON
+            method: 'POST',
+            body: JSON.stringify({ email })
         });
         
-        setStep(2); // Si ça marche, on passe à l'étape du code
+        setStep(2); 
     } catch (err) {
         console.error("Erreur complète:", err);
-        // Ton service api.js jette déjà l'erreur JSON, on l'affiche ici
+     
         alert(err.message || "L'email n'existe pas ou erreur serveur");
     } finally {
         setLoading(false);
     }
 };
 
-  // ÉTAPE 2 & 3 : Valider le tout
+  
   const handleReset = async (e) => {
     e.preventDefault();
     setLoading(true);

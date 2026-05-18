@@ -24,7 +24,7 @@ const FormationsSection = () => {
   useEffect(() => {
     const getFormations = async () => {
       try {
-        const data = await api.get('/formations');
+        const data = await api.get('/formations?mode=vitrine');
         setFormations(data);
       } catch (error) {
         console.error("Erreur chargement formations:", error);
@@ -42,7 +42,7 @@ const FormationsSection = () => {
     : formations.filter(f => f.categorie === filtre);
 
   return (
-    <section id="formations" className="py-16 bg-gray-50">
+    <section id="formations" className="py-16 bg-white">
       <div className="max-w-6xl mx-auto px-5">
         
         <div className="mb-12 text-center">
@@ -80,27 +80,27 @@ const FormationsSection = () => {
             <p className="text-gray-500">Chargement du catalogue...</p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {filteredFormations.map((formation) => (
               <div 
                 key={formation.id} 
                 className="group bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
               >
                 <div className="relative h-44 w-full overflow-hidden bg-gray-100">
-                  <img 
+                  .<img 
                     src={formation.image} 
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
                     alt={formation.titre}
                   />
                   <div className="absolute top-3 left-3">
-                    <span className="bg-white/90 text-gray-700 text-xs font-medium px-2 py-1 rounded-md">
+                    <span className="bg-green-300 text-gray-800 text-xs font-medium px-2 py-1 rounded-md">
                       {formation.public_cible}
                     </span>
                   </div>
                 </div>
 
                 <div className="p-4">
-                  <span className="text-amber-600 text-xs font-semibold uppercase tracking-wide">
+                  <span className="text-green-600 text-xs font-semibold uppercase tracking-wide">
                     {formation.categorie}
                   </span>
                   

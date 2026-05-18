@@ -1,55 +1,66 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
-    HiOutlineXCircle ,
+  HiOutlineXCircle,
   HiOutlineSearch, 
   HiOutlineEye, 
   HiOutlineCheckCircle, 
   HiOutlineRefresh, 
   HiOutlineDownload,
-  HiOutlineCalendar 
 } from 'react-icons/hi';
-import ConfirmationSuppression from './ConfirmationSuppression';
-
-// Données temporaires (simulation)
-const paiementsSimules = [
-  { id: 1, apprenant: 'Moussa Kabore', formation: 'Développement Web', montant: 150000, mode: 'orange_money', date: '2024-03-15T10:30:00', statut: 'valide', transactionId: 'ORNG-123456789', telephone: '+22670123456' },
-  { id: 2, apprenant: 'Alphonse Sore', formation: 'Robotique Enfant', montant: 80000, mode: 'wave', date: '2024-03-20T14:45:00', statut: 'en_attente', transactionId: 'WAVE-987654321', telephone: '+22670234567' },
-  { id: 3, apprenant: 'Marie Ouedraogo', formation: 'Data Science', montant: 200000, mode: 'carte', date: '2024-03-25T09:15:00', statut: 'valide', transactionId: 'CRD-456789123', telephone: '+22670345678' },
-  { id: 4, apprenant: 'Jean Dupont', formation: 'Cybersécurité', montant: 180000, mode: 'moov_money', date: '2024-04-01T16:20:00', statut: 'echoue', transactionId: 'MOOV-789123456', telephone: '+22670456789' },
-  { id: 5, apprenant: 'Fatou Diallo', formation: 'Programmation Enfant', montant: 60000, mode: 'orange_money', date: '2024-04-05T11:00:00', statut: 'en_attente', transactionId: 'ORNG-456123789', telephone: '+22670567890' },
-];
+import api from '../../../services/api';
+import toast, { Toaster } from 'react-hot-toast';
 
 const GestionPaiements = () => {
   const [recherche, setRecherche] = useState('');
   const [filtreStatut, setFiltreStatut] = useState('tous');
   const [filtreMode, setFiltreMode] = useState('tous');
-  const [paiements, setPaiements] = useState(paiementsSimules);
+  const [paiements, setPaiements] = useState([]);
+  const [chargement, setChargement] = useState(true);
   const [modalDetailsOuverte, setModalDetailsOuverte] = useState(false);
   const [paiementSelectionne, setPaiementSelectionne] = useState(null);
 
+  // Charger les vraies données de l'API
+  const fetchPaiements = async () => {
+    try {
+      setChargement(true);
+      const data = await api.get('/admin/transactions');
+      setPaiements(data);
+    } catch (error) {
+      console.error("Erreur de chargement des transactions:", error);
+      toast.error("Erreur lors de la récupération des transactions");
+    } finally {
+      setChargement(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPaiements();
+  }, []);
+
   // Filtrer les paiements
   const paiementsFiltres = paiements.filter(p => {
-    const matchRecherche = p.apprenant.toLowerCase().includes(recherche.toLowerCase()) ||
-                           p.formation.toLowerCase().includes(recherche.toLowerCase()) ||
-                           p.transactionId.toLowerCase().includes(recherche.toLowerCase());
+    const matchRecherche = (p.apprenant?.toLowerCase().includes(recherche.toLowerCase()) || false) ||
+                           (p.formation?.toLowerCase().includes(recherche.toLowerCase()) || false) ||
+                           (p.transactionId?.toLowerCase().includes(recherche.toLowerCase()) || false);
     const matchStatut = filtreStatut === 'tous' || p.statut === filtreStatut;
     const matchMode = filtreMode === 'tous' || p.mode === filtreMode;
     return matchRecherche && matchStatut && matchMode;
   });
 
-  // Statistiques
-  const totalMontant = paiements.reduce((sum, p) => sum + p.montant, 0);
-  const totalEnAttente = paiements.filter(p => p.statut === 'en_attente').reduce((sum, p) => sum + p.montant, 0);
-  const totalValide = paiements.filter(p => p.statut === 'valide').reduce((sum, p) => sum + p.montant, 0);
-  const totalRembourse = paiements.filter(p => p.statut === 'rembourse').reduce((sum, p) => sum + p.montant, 0);
+  // Calcul des statistiques dynamiques
+  const totalMontant = paiementsFiltres.reduce((sum, p) => sum + Number(p.montant || 0), 0);
+  const totalEnAttente = paiementsFiltres.filter(p => p.statut === 'en_attente').reduce((sum, p) => sum + Number(p.montant || 0), 0);
+  const totalValide = paiementsFiltres.filter(p => p.statut === 'valide').reduce((sum, p) => sum + Number(p.montant || 0), 0);
+  const totalRembourse = paiementsFiltres.filter(p => p.statut === 'rembourse').reduce((sum, p) => sum + Number(p.montant || 0), 0);
 
-  // Couleurs des badges
+  // Couleurs des badges de statut
   const getStatutColor = (statut) => {
     switch(statut) {
       case 'valide': return 'bg-green-100 text-green-700';
       case 'en_attente': return 'bg-orange-100 text-orange-700';
+      case 'essai': return 'bg-blue-100 text-blue-700';
       case 'echoue': return 'bg-red-100 text-red-700';
-      case 'rembourse': return 'bg-blue-100 text-blue-700';
+      case 'rembourse': return 'bg-purple-100 text-purple-700';
       default: return 'bg-gray-100 text-gray-700';
     }
   };
@@ -58,6 +69,7 @@ const GestionPaiements = () => {
     switch(statut) {
       case 'valide': return 'Validé';
       case 'en_attente': return 'En attente';
+      case 'essai': return 'Essai Gratuit';
       case 'echoue': return 'Échoué';
       case 'rembourse': return 'Remboursé';
       default: return statut;
@@ -70,47 +82,57 @@ const GestionPaiements = () => {
       case 'wave': return 'Wave';
       case 'carte': return 'Carte bancaire';
       case 'moov_money': return 'Moov Money';
+      case 'essai': return 'Aucun (Essai)';
       default: return mode;
     }
   };
 
   const getModeColor = (mode) => {
     switch(mode) {
-      case 'orange_money': return 'bg-orange-100 text-orange-700';
-      case 'wave': return 'bg-purple-100 text-purple-700';
-      case 'carte': return 'bg-blue-100 text-blue-700';
-      case 'moov_money': return 'bg-yellow-100 text-yellow-700';
-      default: return 'bg-gray-100 text-gray-700';
+      case 'orange_money': return 'bg-orange-50 text-orange-700 border border-orange-200';
+      case 'wave': return 'bg-purple-50 text-purple-700 border border-purple-200';
+      case 'carte': return 'bg-blue-50 text-blue-700 border border-blue-200';
+      case 'moov_money': return 'bg-yellow-50 text-yellow-700 border border-yellow-200';
+      default: return 'bg-gray-50 text-gray-700 border';
     }
   };
 
-  // Valider un paiement
-  const handleValider = (id) => {
-    setPaiements(paiements.map(p =>
-      p.id === id 
-        ? { ...p, statut: 'valide' }
-        : p
-    ));
-  };
-
-  // Rembourser un paiement
-  const handleRembourser = (id) => {
-    if (window.confirm('Êtes-vous sûr de vouloir rembourser ce paiement ?')) {
-      setPaiements(paiements.map(p =>
-        p.id === id 
-          ? { ...p, statut: 'rembourse' }
-          : p
-      ));
+  // Forcer la validation manuelle d'un paiement en suspens (Action Admin)
+  const handleValider = async (id) => {
+    try {
+      toast.loading("Validation forcée de la transaction...");
+      await api.put(`/inscriptions/${id}/valider-paiement-manuel`); // Route à créer si nécessaire
+      toast.dismiss();
+      toast.success("Paiement validé avec succès !");
+      fetchPaiements();
+    } catch (err) {
+      toast.dismiss();
+      toast.error("Erreur lors de la validation");
     }
   };
 
-  // Voir les détails
+  // Enregistrer un remboursement
+  const handleRembourser = async (id) => {
+    if (window.confirm('Êtes-vous sûr de vouloir marquer cette inscription comme remboursée ?')) {
+      try {
+        toast.loading("Mise à jour du remboursement...");
+        await api.put(`/inscriptions/${id}/rembourser`); // Route optionnelle
+        toast.dismiss();
+        toast.success("Remboursement enregistré.");
+        fetchPaiements();
+      } catch (err) {
+        toast.dismiss();
+        toast.error("Erreur de traitement");
+      }
+    }
+  };
+
   const handleVoirDetails = (paiement) => {
     setPaiementSelectionne(paiement);
     setModalDetailsOuverte(true);
   };
 
-  // Exporter en CSV
+  // Exporter la situation comptable réelle en CSV
   const handleExporterCSV = () => {
     const headers = ['ID', 'Apprenant', 'Formation', 'Montant', 'Mode', 'Date', 'Statut', 'Transaction ID', 'Téléphone'];
     const rows = paiementsFiltres.map(p => [
@@ -119,7 +141,7 @@ const GestionPaiements = () => {
       p.formation,
       p.montant,
       getModeLabel(p.mode),
-      new Date(p.date).toLocaleString('fr-FR'),
+      p.date ? new Date(p.date).toLocaleString('fr-FR') : '-',
       getStatutLabel(p.statut),
       p.transactionId,
       p.telephone || ''
@@ -130,59 +152,60 @@ const GestionPaiements = () => {
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', 'paiements.csv');
+    link.setAttribute('download', `comptabilite_pschool_${new Date().toLocaleDateString()}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  // Formater le prix
   const formatPrix = (prix) => {
     return new Intl.NumberFormat('fr-FR').format(prix) + ' FCFA';
   };
 
-  // Formater la date
   const formatDate = (date) => {
+    if (!date) return '-';
     return new Date(date).toLocaleDateString('fr-FR') + ' ' + new Date(date).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
   };
 
   return (
-    <div>
+    <div className="p-4 max-w-7xl mx-auto">
+      <Toaster position="top-right" />
+      
       {/* En-tête */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Paiements</h1>
+          <h1 className="text-2xl font-bold text-gray-800">Suivi des Flux Financiers</h1>
           <p className="text-gray-500 text-sm mt-1">
-            Gérer les transactions financières
+            Visualisez et gérez les encaissements CinetPay et les essais gratuits
           </p>
         </div>
         <button
           onClick={handleExporterCSV}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
+          className="flex items-center gap-2 bg-slate-900 hover:bg-black text-white px-4 py-2 rounded-lg transition text-sm font-semibold"
         >
           <HiOutlineDownload className="h-5 w-5" />
-          Exporter CSV
+          Exporter l'état financier
         </button>
       </div>
 
-      {/* Statistiques */}
+      {/* Statistiques Dynamiques */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-gray-500 text-sm">Total</p>
-          <p className="text-2xl font-bold text-gray-800">{formatPrix(totalMontant)}</p>
+        <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm">
+          <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">Chiffre d'Affaires Global</p>
+          <p className="text-2xl font-black text-slate-900 mt-1">{formatPrix(totalMontant)}</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-gray-500 text-sm">En attente</p>
-          <p className="text-2xl font-bold text-orange-600">{formatPrix(totalEnAttente)}</p>
+        <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm">
+          <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">En attente de paiement</p>
+          <p className="text-2xl font-black text-orange-600 mt-1">{formatPrix(totalEnAttente)}</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-gray-500 text-sm">Validé</p>
-          <p className="text-2xl font-bold text-green-600">{formatPrix(totalValide)}</p>
+        <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm">
+          <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">Total Encaissé Securisé</p>
+          <p className="text-2xl font-black text-green-600 mt-1">{formatPrix(totalValide)}</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-gray-500 text-sm">Remboursé</p>
-          <p className="text-2xl font-bold text-blue-600">{formatPrix(totalRembourse)}</p>
+        <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm">
+          <p className="text-gray-400 text-xs font-bold uppercase tracking-wider">Total Décaissements (Remboursé)</p>
+          <p className="text-2xl font-black text-purple-600 mt-1">{formatPrix(totalRembourse)}</p>
         </div>
       </div>
 
@@ -192,19 +215,20 @@ const GestionPaiements = () => {
           <HiOutlineSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
           <input
             type="text"
-            placeholder="Rechercher par apprenant, formation ou ID transaction..."
+            placeholder="Filtrer par apprenant, formation ou référence de reçu..."
             value={recherche}
             onChange={(e) => setRecherche(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
           />
         </div>
         <select
           value={filtreStatut}
           onChange={(e) => setFiltreStatut(e.target.value)}
-          className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none text-sm bg-white font-medium text-gray-700"
         >
-          <option value="tous">Tous les statuts</option>
-          <option value="valide">Validés</option>
+          <option value="tous">Tous les états financiers</option>
+          <option value="valide">Validés (Payés)</option>
+          <option value="essai">En mode Essai</option>
           <option value="en_attente">En attente</option>
           <option value="echoue">Échoués</option>
           <option value="rembourse">Remboursés</option>
@@ -212,153 +236,157 @@ const GestionPaiements = () => {
         <select
           value={filtreMode}
           onChange={(e) => setFiltreMode(e.target.value)}
-          className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none text-sm bg-white font-medium text-gray-700"
         >
           <option value="tous">Tous les modes</option>
           <option value="orange_money">Orange Money</option>
+          <option value="moov_money">Moov Money</option>
           <option value="wave">Wave</option>
           <option value="carte">Carte bancaire</option>
-          <option value="moov_money">Moov Money</option>
+          <option value="essai">Sans paiement (Essai)</option>
         </select>
       </div>
 
-      {/* Tableau des paiements */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[1000px]">
-            <thead className="bg-gray-50 border-b">
-              <tr>
-                <th className="text-left px-6 py-3 text-sm font-semibold text-gray-600">ID</th>
-                <th className="text-left px-6 py-3 text-sm font-semibold text-gray-600">Apprenant</th>
-                <th className="text-left px-6 py-3 text-sm font-semibold text-gray-600">Formation</th>
-                <th className="text-left px-6 py-3 text-sm font-semibold text-gray-600">Montant</th>
-                <th className="text-left px-6 py-3 text-sm font-semibold text-gray-600">Mode</th>
-                <th className="text-left px-6 py-3 text-sm font-semibold text-gray-600">Date</th>
-                <th className="text-left px-6 py-3 text-sm font-semibold text-gray-600">Statut</th>
-                <th className="text-center px-6 py-3 text-sm font-semibold text-gray-600">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paiementsFiltres.map((p) => (
-                <tr key={p.id} className="border-b hover:bg-gray-50">
-                  <td className="px-6 py-3 text-sm text-gray-600">{p.id}</td>
-                  <td className="px-6 py-3 text-sm font-medium text-gray-800">{p.apprenant}</td>
-                  <td className="px-6 py-3 text-sm text-gray-600">{p.formation}</td>
-                  <td className="px-6 py-3 text-sm font-semibold text-green-600">{formatPrix(p.montant)}</td>
-                  <td className="px-6 py-3">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getModeColor(p.mode)}`}>
-                      {getModeLabel(p.mode)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-3 text-sm text-gray-600">{formatDate(p.date)}</td>
-                  <td className="px-6 py-3">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatutColor(p.statut)}`}>
-                      {getStatutLabel(p.statut)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-3 text-center">
-                    <div className="flex items-center justify-center gap-2">
-                      <button 
-                        onClick={() => handleVoirDetails(p)}
-                        className="p-1 text-blue-600 hover:bg-blue-50 rounded transition"
-                        title="Voir détails"
-                      >
-                        <HiOutlineEye className="h-5 w-5" />
-                      </button>
-                      {p.statut === 'en_attente' && (
-                        <button 
-                          onClick={() => handleValider(p.id)}
-                          className="p-1 text-green-600 hover:bg-green-50 rounded transition"
-                          title="Valider"
-                        >
-                          <HiOutlineCheckCircle className="h-5 w-5" />
-                        </button>
-                      )}
-                      {p.statut === 'valide' && (
-                        <button 
-                          onClick={() => handleRembourser(p.id)}
-                          className="p-1 text-blue-600 hover:bg-blue-50 rounded transition"
-                          title="Rembourser"
-                        >
-                          <HiOutlineRefresh className="h-5 w-5" />
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* Tableau ou loader */}
+      {chargement ? (
+        <div className="p-12 text-center text-gray-400 italic bg-white rounded-xl border">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900 mx-auto mb-4"></div>
+          Génération de l'état comptable en direct...
         </div>
-
-        {/* Message si aucun résultat */}
-        {paiementsFiltres.length === 0 && (
-          <div className="text-center py-8 text-gray-500">
-            Aucun paiement trouvé
+      ) : paiementsFiltres.length === 0 ? (
+        <div className="bg-white border rounded-xl p-12 text-center text-gray-400 font-medium">
+          Aucune écriture comptable ne correspond aux filtres appliqués.
+        </div>
+      ) : (
+        <div className="bg-white rounded-xl border overflow-hidden shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[1000px] text-left border-collapse">
+              <thead className="bg-gray-50 border-b text-gray-600 text-xs font-bold uppercase tracking-wider">
+                <tr>
+                  <th className="px-6 py-4">ID Ref</th>
+                  <th className="px-6 py-4">Apprenant</th>
+                  <th className="px-6 py-4">Formation</th>
+                  <th className="px-6 py-4">Montant initial</th>
+                  <th className="px-6 py-4">Mode d'encaissement</th>
+                  <th className="px-6 py-4">Date écriture</th>
+                  <th className="px-6 py-4">Statut Transaction</th>
+                  <th className="text-center px-6 py-4">Ajustements</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y text-sm text-gray-700">
+                {paiementsFiltres.map((p) => (
+                  <tr key={p.id} className="hover:bg-gray-50/60 transition-colors">
+                    <td className="px-6 py-4 font-mono text-xs text-gray-400">#{p.id}</td>
+                    <td className="px-6 py-4 font-semibold text-gray-900">{p.apprenant}</td>
+                    <td className="px-6 py-4 text-gray-600">{p.formation}</td>
+                    <td className="px-6 py-4 font-bold text-slate-900">{formatPrix(p.montant)}</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${getModeColor(p.mode)}`}>
+                        {getModeLabel(p.mode)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-gray-500 text-xs">{formatDate(p.date)}</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${getStatutColor(p.statut)}`}>
+                        {getStatutLabel(p.statut)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <button 
+                          onClick={() => handleVoirDetails(p)}
+                          className="p-2 text-blue-600 hover:bg-blue-50 border border-transparent hover:border-blue-200 rounded-lg transition"
+                          title="Fiche détaillée"
+                        >
+                          <HiOutlineEye className="h-5 w-5" />
+                        </button>
+                        {p.statut === 'en_attente' && (
+                          <button 
+                            onClick={() => handleValider(p.id)}
+                            className="p-2 text-green-600 hover:bg-green-50 border border-transparent hover:border-green-200 rounded-lg transition"
+                            title="Forcer la validation financière"
+                          >
+                            <HiOutlineCheckCircle className="h-5 w-5" />
+                          </button>
+                        )}
+                        {p.statut === 'valide' && (
+                          <button 
+                            onClick={() => handleRembourser(p.id)}
+                            className="p-2 text-purple-600 hover:bg-purple-50 border border-transparent hover:border-purple-200 rounded-lg transition"
+                            title="Marquer comme Remboursé"
+                          >
+                            <HiOutlineRefresh className="h-5 w-5" />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Modale des détails */}
       {modalDetailsOuverte && paiementSelectionne && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="fixed inset-0 bg-black/50" onClick={() => setModalDetailsOuverte(false)}></div>
+          <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setModalDetailsOuverte(false)}></div>
           <div className="relative min-h-screen flex items-center justify-center p-4">
-            <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md">
-              <div className="flex items-center justify-between p-6 border-b">
-                <h2 className="text-xl font-bold text-gray-800">Détails du paiement</h2>
-                <button onClick={() => setModalDetailsOuverte(false)} className="p-1 rounded-lg hover:bg-gray-100 transition">
-                  <HiOutlineXCircle  className="h-5 w-5 text-gray-500" />
+            <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border">
+              <div className="flex items-center justify-between p-6 border-b bg-gray-50">
+                <div>
+                  <h2 className="text-base font-black text-gray-900 uppercase tracking-tight">Pièce Comptable</h2>
+                  <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">ID #{paiementSelectionne.id}</p>
+                </div>
+                <button onClick={() => setModalDetailsOuverte(false)} className="p-2 bg-white border rounded-xl hover:text-red-500 transition shadow-sm">
+                  <HiOutlineXCircle className="h-5 w-5" />
                 </button>
               </div>
-              <div className="p-6 space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-500">ID :</span>
-                  <span className="font-medium">{paiementSelectionne.id}</span>
+              <div className="p-6 space-y-4 text-sm divide-y divide-gray-50">
+                <div className="flex justify-between pt-1">
+                  <span className="text-gray-400 font-medium">Nom de l'Apprenant</span>
+                  <span className="font-bold text-gray-900">{paiementSelectionne.apprenant}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Apprenant :</span>
-                  <span className="font-medium">{paiementSelectionne.apprenant}</span>
+                <div className="flex justify-between pt-3">
+                  <span className="text-gray-400 font-medium">Formation ciblée</span>
+                  <span className="font-semibold text-gray-800">{paiementSelectionne.formation}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Formation :</span>
-                  <span className="font-medium">{paiementSelectionne.formation}</span>
+                <div className="flex justify-between pt-3">
+                  <span className="text-gray-400 font-medium">Frais d'inscription</span>
+                  <span className="font-black text-emerald-600 text-base">{formatPrix(paiementSelectionne.montant)}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Montant :</span>
-                  <span className="font-medium text-green-600">{formatPrix(paiementSelectionne.montant)}</span>
+                <div className="flex justify-between pt-3">
+                  <span className="text-gray-400 font-medium">Passerelle de Paiement</span>
+                  <span className="font-bold text-gray-800">{getModeLabel(paiementSelectionne.mode)}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Mode :</span>
-                  <span className="font-medium">{getModeLabel(paiementSelectionne.mode)}</span>
+                <div className="flex justify-between pt-3">
+                  <span className="text-gray-400 font-medium">Date & Heure d'écriture</span>
+                  <span className="font-medium text-gray-700 text-xs">{formatDate(paiementSelectionne.date)}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Date :</span>
-                  <span className="font-medium">{formatDate(paiementSelectionne.date)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Statut :</span>
-                  <span className={`font-medium ${getStatutColor(paiementSelectionne.statut)}`}>
+                <div className="flex justify-between pt-3">
+                  <span className="text-gray-400 font-medium">État comptable</span>
+                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${getStatutColor(paiementSelectionne.statut)}`}>
                     {getStatutLabel(paiementSelectionne.statut)}
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Transaction ID :</span>
-                  <span className="font-medium text-xs">{paiementSelectionne.transactionId}</span>
+                <div className="flex justify-between pt-3">
+                  <span className="text-gray-400 font-medium">Référence CinetPay ID</span>
+                  <span className="font-mono text-[11px] bg-slate-50 px-2 py-1 rounded border text-slate-600">{paiementSelectionne.transactionId}</span>
                 </div>
                 {paiementSelectionne.telephone && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Téléphone :</span>
-                    <span className="font-medium">{paiementSelectionne.telephone}</span>
+                  <div className="flex justify-between pt-3">
+                    <span className="text-gray-400 font-medium">Contact Émetteur</span>
+                    <span className="font-semibold text-gray-800">{paiementSelectionne.telephone}</span>
                   </div>
                 )}
               </div>
-              <div className="p-6 pt-0">
+              <div className="p-6 bg-gray-50">
                 <button
                   onClick={() => setModalDetailsOuverte(false)}
-                  className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+                  className="w-full py-3 bg-white border-2 text-gray-700 rounded-xl font-bold text-sm hover:bg-gray-100 transition shadow-sm"
                 >
-                  Fermer
+                  Quitter la fiche
                 </button>
               </div>
             </div>

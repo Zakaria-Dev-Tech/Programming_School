@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\FormationController;
+use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\InscriptionController;
 use Illuminate\Support\Facades\Route;
@@ -16,6 +17,7 @@ use App\Http\Controllers\Api\NotificationController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/auth/login-badge', [AuthController::class, 'loginBadge']);
+Route::post('/contact', [ContactController::class, 'store']);
 // routes/api.php
 Route::get('/formations/{id}/contenu', [CoursController::class, 'getContenuFormation'])
      ->middleware('auth:sanctum');
@@ -61,10 +63,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/apprenant/formation/{id}/contenu', [CoursController::class, 'getContenuPourApprenant']);
     Route::post('/cours/{id}/terminer', [CoursController::class, 'terminerCours']);
     // Routes Quiz
-    Route::post('/formations/cours/{coursId}/quiz', [QuizController::class, 'store']); // Pour le formateur
-    Route::get('/formations/cours/{coursId}/quiz', [QuizController::class, 'show']);   // Pour afficher le quiz
-    Route::post('/quizzes/{quizId}/verifier', [QuizController::class, 'verifier']);   // Pour l'élève
+    Route::post('/formations/cours/{coursId}/quiz', [QuizController::class, 'store']); 
+    Route::get('/formations/cours/{coursId}/quiz', [QuizController::class, 'show']);   
+    Route::post('/quizzes/{quizId}/verifier', [QuizController::class, 'verifier']);   
     Route::post('/formateur/notifications/envoyer', [NotificationController::class, 'envoyerNotification']);
     Route::get('/apprenant/notifications', [NotificationController::class, 'index']);
     Route::put('/notifications/{id}/lire', [NotificationController::class, 'marquerCommeLu']);
+    Route::post('/payment/simulate', [App\Http\Controllers\Api\PaymentSimulationController::class, 'simulate']);
+    Route::get('/parent/enfants/inscriptions', [EnfantController::class, 'getInscriptionsEnfants']);
+    Route::post('/payment/simulate-parent', [EnfantController::class, 'simulateParentPayment']);
+    Route::get('/admin/transactions', [InscriptionController::class, 'getAllTransactionsAdmin']);
+
+    Route::get('/admin/messages', [ContactController::class, 'index']);
+    Route::put('/admin/messages/{id}/toggle-lu', [ContactController::class, 'toggleLu']);
+
 });
