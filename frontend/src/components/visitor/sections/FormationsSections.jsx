@@ -88,7 +88,11 @@ const FormationsSection = () => {
               >
                 <div className="relative h-44 w-full overflow-hidden bg-gray-100">
                   .<img 
-                    src={formation.image} 
+                    src={
+                      formation.image && formation.image.includes('127.0.0.1:8000') 
+                        ? formation.image.replace('http://127.0.0.1:8000', 'https://pschool-backend.onrender.com') 
+                        : formation.image
+                    } 
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
                     alt={formation.titre}
                   />
