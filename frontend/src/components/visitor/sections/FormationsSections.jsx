@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { 
-  HiOutlineClock,  HiOutlineBookOpen, HiArrowRight, 
-   HiX 
+  HiOutlineClock, HiOutlineBookOpen, HiArrowRight, 
+  HiX 
 } from 'react-icons/hi';
 import { FaUserPlus, FaBookOpen, FaCreditCard, FaAward } from 'react-icons/fa';
 import api from '../../../services/api'; 
@@ -87,7 +87,7 @@ const FormationsSection = () => {
                 className="group bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
               >
                 <div className="relative h-44 w-full overflow-hidden bg-gray-100">
-                  .<img 
+                  <img 
                     src={
                       formation.image && formation.image.includes('127.0.0.1:8000') 
                         ? formation.image.replace('http://127.0.0.1:8000', 'https://pschool-backend.onrender.com') 
@@ -192,7 +192,11 @@ const FormationsSection = () => {
               <div className="flex flex-col md:flex-row gap-6">
                 <div className="w-full md:w-2/5 h-48 rounded-md overflow-hidden bg-gray-100">
                   <img 
-                    src={formationSelectionnee.image} 
+                    src={
+                      formationSelectionnee.image && formationSelectionnee.image.includes('127.0.0.1:8000') 
+                        ? formationSelectionnee.image.replace('http://127.0.0.1:8000', 'https://pschool-backend.onrender.com') 
+                        : formationSelectionnee.image
+                    } 
                     alt={formationSelectionnee.titre} 
                     className="w-full h-full object-cover"
                   />

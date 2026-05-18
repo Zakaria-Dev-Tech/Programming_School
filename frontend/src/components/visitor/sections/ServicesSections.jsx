@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { FaWhatsapp, FaArrowRight, FaEnvelope, FaCode, FaRobot, FaCloud, FaShieldAlt, FaMobileAlt, FaDatabase } from 'react-icons/fa';
 import { HiX } from 'react-icons/hi';
 import api from '../../../services/api';
+
 const ServicesSection = () => {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,20 +19,20 @@ const ServicesSection = () => {
     return <FaDatabase className="text-2xl" />;
   };
 
-useEffect(() => {
-  api.get('/services') 
-    .then(res => {
-      
-      const data = res.data || res; 
-      const visiblesuniquement = data.filter(s => s.statut === 'actif');
-      setServices(visiblesuniquement);
-      setLoading(false);
-    })
-    .catch(err => {
-      console.error(err);
-      setLoading(false);
-    });
-}, []);
+  useEffect(() => {
+    api.get('/services') 
+      .then(res => {
+        const data = res.data || res; 
+        const visiblesuniquement = data.filter(s => s.statut === 'actif');
+        setServices(visiblesuniquement);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, []);
+
   const getColorClass = (color) => {
     const colors = {
       blue: 'bg-blue-600',
@@ -42,8 +42,6 @@ useEffect(() => {
     };
     return colors[color] || 'bg-gray-600';
   };
-
-
 
   const scrollToContact = () => {
     const contactSection = document.getElementById('contact');
@@ -84,8 +82,12 @@ useEffect(() => {
                 className="group bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
               >
                 <div className="relative h-40 w-full overflow-hidden bg-gray-100">
-                 <img 
-                    src={service.image?.startsWith('http') ? service.image : `https://pschool-backend.onrender.com/storage/${service.image}`} 
+                  <img 
+                    src={
+                      service.image && service.image.includes('127.0.0.1:8000') 
+                        ? service.image.replace('http://127.0.0.1:8000', 'https://pschool-backend.onrender.com') 
+                        : service.image
+                    } 
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
                     alt={service.titre}
                   />
@@ -147,7 +149,11 @@ useEffect(() => {
                 <div className="flex flex-col md:flex-row gap-6">
                   <div className="w-full md:w-2/5 h-48 rounded-md overflow-hidden bg-gray-100">
                     <img 
-                      src={serviceSelectionne.image} 
+                      src={
+                        serviceSelectionne.image && serviceSelectionne.image.includes('127.0.0.1:8000') 
+                          ? serviceSelectionne.image.replace('http://127.0.0.1:8000', 'https://pschool-backend.onrender.com') 
+                          : serviceSelectionne.image
+                      } 
                       alt={serviceSelectionne.titre} 
                       className="w-full h-full object-cover"
                     />
