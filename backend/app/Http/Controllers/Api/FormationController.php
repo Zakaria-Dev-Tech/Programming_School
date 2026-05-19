@@ -44,10 +44,17 @@ class FormationController extends Controller
             $data = $request->all();
 
             if ($request->hasFile('image')) {
-                $upload = cloudinary()->upload($request->file('image')->getRealPath(), [
-                    'folder' => 'pschool/formations'
-                ]);
-                $data['image'] = $upload->getSecurePath();
+                // Vérifier si cloudinary est installé
+                if (class_exists('\CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary')) {
+                    $upload = cloudinary()->upload($request->file('image')->getRealPath(), [
+                        'folder' => 'pschool/formations'
+                    ]);
+                    $data['image'] = $upload->getSecurePath();
+                } else {
+                    // Fallback: stockage local
+                    $path = $request->file('image')->store('formations', 'public');
+                    $data['image'] = asset('storage/' . $path);
+                }
             }
 
             $formation = Formation::create($data);
@@ -59,6 +66,7 @@ class FormationController extends Controller
             ], 201);
 
         } catch (\Exception $e) {
+            \Log::error('Erreur store formation: ' . $e->getMessage());
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
@@ -71,9 +79,9 @@ class FormationController extends Controller
             $validator = Validator::make($request->all(), [
                 'titre' => 'sometimes|required|string|max:255',
                 'description' => 'sometimes|required|string',
-                'prix' => 'sometimes|required',
+                'prix' => 'sometimes|required|numeric',
                 'duree' => 'sometimes|required|string',
-                'nb_modules' => 'sometimes|required',
+                'nb_modules' => 'sometimes|required|integer|min:0',
                 'categorie' => 'sometimes|required|string',
                 'public_cible' => 'sometimes|required|string',
                 'statut' => 'sometimes|required|in:actif,inactif', 
@@ -84,14 +92,18 @@ class FormationController extends Controller
                 return response()->json(['errors' => $validator->errors()], 422);
             }
 
-            // On exclut l'image et le _method du remplissage automatique
-            $data = $request->except(['image', '_method']);
+            $data = $request->except(['_method']);
 
             if ($request->hasFile('image')) {
-                $upload = cloudinary()->upload($request->file('image')->getRealPath(), [
-                    'folder' => 'pschool/formations'
-                ]);
-                $data['image'] = $upload->getSecurePath();
+                if (class_exists('\CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary')) {
+                    $upload = cloudinary()->upload($request->file('image')->getRealPath(), [
+                        'folder' => 'pschool/formations'
+                    ]);
+                    $data['image'] = $upload->getSecurePath();
+                } else {
+                    $path = $request->file('image')->store('formations', 'public');
+                    $data['image'] = asset('storage/' . $path);
+                }
             }
 
             $formation->update($data);
@@ -103,18 +115,23 @@ class FormationController extends Controller
             ], 200);
 
         } catch (\Exception $e) {
+            \Log::error('Erreur update formation: ' . $e->getMessage());
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
 
     public function destroy($id)
     {
-        $formation = Formation::find($id);
-        if ($formation) {
-            $formation->delete();
-            return response()->json(['message' => 'Supprimée'], 200);
+        try {
+            $formation = Formation::find($id);
+            if ($formation) {
+                $formation->delete();
+                return response()->json(['message' => 'Supprimée'], 200);
+            }
+            return response()->json(['message' => 'Non trouvée'], 404);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
         }
-        return response()->json(['message' => 'Non trouvée'], 404);
     }
 
     public function show($id)
@@ -128,7 +145,15 @@ class FormationController extends Controller
 
     public function getFormateurFormations()
     {
-        $formations = Formation::where('formateur_id', auth()->id())->get();
-        return response()->json($formations, 200);
+        try {
+            $user = auth()->user();
+            if (!$user) {
+                return response()->json(['message' => 'Non authentifié'], 401);
+            }
+            $formations = Formation::where('formateur_id', $user->id)->get();
+            return response()->json($formations, 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
 }

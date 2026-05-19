@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 
 class ServiceController extends Controller
 {
@@ -20,7 +21,7 @@ class ServiceController extends Controller
             $validator = Validator::make($request->all(), [
                 'titre' => 'required|string|max:255',
                 'description' => 'required|string',
-                'statut' => 'required|string',
+                'statut' => 'required|in:actif,inactif',
                 'color' => 'nullable|string',
                 'whatsapp_message' => 'nullable|string',
                 'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048'
@@ -30,25 +31,22 @@ class ServiceController extends Controller
                 return response()->json(['errors' => $validator->errors()], 422);
             }
 
-            $data = $request->all();
+            $data = $request->except('image');
 
             if ($request->hasFile('image')) {
-                $upload = cloudinary()->upload($request->file('image')->getRealPath(), [
-                    'folder' => 'pschool/services'
-                ]);
-                $data['image'] = $upload->getSecurePath();
+                $path = $request->file('image')->store('services', 'public');
+                $data['image'] = asset('storage/' . $path);
             }
 
             $service = Service::create($data);
 
             return response()->json([
-                'status' => 'success',
                 'message' => 'Service créé avec succès',
                 'service' => $service
             ], 201);
-
         } catch (\Exception $e) {
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+            \Log::error('Erreur store service: ' . $e->getMessage());
+            return response()->json(['message' => $e->getMessage()], 500);
         }
     }
 
@@ -58,9 +56,9 @@ class ServiceController extends Controller
             $service = Service::findOrFail($id);
 
             $validator = Validator::make($request->all(), [
-                'titre' => 'sometimes|required|string|max:255', // Changé 'nom' en 'titre' pour correspondre au store
+                'titre' => 'sometimes|required|string|max:255',
                 'description' => 'sometimes|required|string',
-                'statut' => 'sometimes|required|string',
+                'statut' => 'sometimes|required|in:actif,inactif',
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
             ]);
 
@@ -68,35 +66,65 @@ class ServiceController extends Controller
                 return response()->json(['errors' => $validator->errors()], 422);
             }
 
-            $data = $request->except(['image', '_method']);
+            $data = $request->except(['_method', 'image']);
 
             if ($request->hasFile('image')) {
-                $upload = cloudinary()->upload($request->file('image')->getRealPath(), [
-                    'folder' => 'pschool/services'
-                ]);
-                $data['image'] = $upload->getSecurePath();
+                if ($service->image) {
+                    $oldPath = str_replace(asset('storage/'), '', $service->image);
+                    if (Storage::disk('public')->exists($oldPath)) {
+                        Storage::disk('public')->delete($oldPath);
+                    }
+                }
+                
+                $path = $request->file('image')->store('services', 'public');
+                $data['image'] = asset('storage/' . $path);
             }
 
             $service->update($data);
 
             return response()->json([
-                'status' => 'success',
                 'message' => 'Service mis à jour avec succès', 
                 'service' => $service
-            ], 200);
-
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+            \Log::error('Erreur update service: ' . $e->getMessage());
+            return response()->json(['message' => $e->getMessage()], 500);
         }
     }
 
     public function destroy($id)
     {
-        $service = Service::find($id);
-        if ($service) {
-            $service->delete();
-            return response()->json(['message' => 'Service supprimé'], 200);
+        try {
+            $service = Service::find($id);
+            
+            if ($service) {
+                if ($service->image) {
+                    $oldPath = str_replace(asset('storage/'), '', $service->image);
+                    if (Storage::disk('public')->exists($oldPath)) {
+                        Storage::disk('public')->delete($oldPath);
+                    }
+                }
+                
+                $service->delete();
+                return response()->json(['message' => 'Service supprimé avec succès'], 200);
+            }
+
+            return response()->json(['message' => 'Service non trouvé'], 404);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
         }
-        return response()->json(['message' => 'Service non trouvé'], 404);
+    }
+    
+    public function show($id)
+    {
+        try {
+            $service = Service::find($id);
+            if (!$service) {
+                return response()->json(['message' => 'Service non trouvé'], 404);
+            }
+            return response()->json($service, 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
 }
