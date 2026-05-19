@@ -3,8 +3,6 @@ const API_URL = "https://pschool-backend.onrender.com/api";
 const api = {
     async request(endpoint, options = {}) {
         const token = localStorage.getItem('token');
-        
-        // Détecter si on envoie un FormData
         const isFormData = options.body instanceof FormData;
         
         const headers = {
@@ -12,7 +10,7 @@ const api = {
             ...options.headers,
         };
         
-        if (!isFormData) {
+        if (!isFormData && options.body && options.body !== null) {
             headers['Content-Type'] = 'application/json';
         }
 
@@ -32,11 +30,28 @@ const api = {
                 throw new Error('Non authentifié');
             }
 
-            const data = await response.json();
+            // Vérifier si la réponse a du contenu
+            const text = await response.text();
+            
+            // Si la réponse est vide, retourner null
+            if (!text) {
+                if (!response.ok) {
+                    throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+                }
+                return null;
+            }
+            
+            // Essayer de parser le JSON
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (e) {
+                console.error('Erreur parsing JSON:', text);
+                throw new Error('Réponse serveur invalide');
+            }
             
             if (!response.ok) {
-                // Conserver les détails de l'erreur
-                const error = new Error(data.message || 'Erreur API');
+                const error = new Error(data.message || data.error || 'Erreur serveur');
                 error.response = { data, status: response.status };
                 throw error;
             }
@@ -62,9 +77,7 @@ const api = {
     put(endpoint, data) {
         const isFormData = data instanceof FormData;
         
-        // Pour Laravel, on utilise POST avec _method=PUT quand c'est du FormData
         if (isFormData) {
-            // Cloner le FormData pour ne pas modifier l'original
             const formDataWithMethod = new FormData();
             for (let [key, value] of data.entries()) {
                 formDataWithMethod.append(key, value);
@@ -77,7 +90,6 @@ const api = {
             });
         }
         
-        // Pour le JSON standard
         return this.request(endpoint, {
             method: 'PUT',
             body: JSON.stringify(data)
@@ -88,7 +100,6 @@ const api = {
         return this.request(endpoint, { method: 'DELETE' });
     },
 
-    // Méthodes de compatibilité
     login(identifier, password) {
         return this.post('/login', { identifier, password });
     },

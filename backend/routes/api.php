@@ -18,9 +18,6 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/auth/login-badge', [AuthController::class, 'loginBadge']);
 Route::post('/contact', [ContactController::class, 'store']);
-// routes/api.php
-Route::get('/formations/{id}/contenu', [CoursController::class, 'getContenuFormation'])
-     ->middleware('auth:sanctum');
 Route::get('/services', [ServiceController::class, 'index']);
 Route::get('/services/{id}', [ServiceController::class, 'show']);
 Route::get('/formations', [FormationController::class, 'index']);
@@ -28,22 +25,20 @@ Route::get('/formations/{id}', [FormationController::class, 'show']);
 Route::get('/formateurs', [AuthController::class, 'getFormateurs']);
 
 Route::middleware('auth:sanctum')->group(function () {
-   
     Route::apiResource('users', UserController::class);
-     Route::get('/enfants', [EnfantController::class, 'index']);
+    Route::get('/enfants', [EnfantController::class, 'index']);
     Route::post('/enfants', [EnfantController::class, 'store']);
     Route::delete('/enfants/{id}', [EnfantController::class, 'destroy']);
     Route::get('/parent/suivi-enfant/{enfantId}', [InscriptionController::class, 'getSuiviEnfant']);
     
-    Route::post('/formations', [FormationController::class, 'store']);
-    Route::match(['post', 'put'], '/formations/{id}', [FormationController::class, 'update']);
-    Route::delete('/formations/{id}', [FormationController::class, 'destroy']);
+    // CORRECTION ICI : Utiliser apiResource pour les formations
+    Route::apiResource('formations', FormationController::class)->except(['show', 'index']);
+    // Garder les routes personnalisées
     Route::get('/formateur/formations', [FormationController::class, 'getFormateurFormations']);
-
-    Route::post('/services', [ServiceController::class, 'store']);
-    Route::match(['post', 'put'], '/services/{id}', [ServiceController::class, 'update']);
-    Route::delete('/services/{id}', [ServiceController::class, 'destroy']);
-
+    
+    // CORRECTION ICI : Utiliser apiResource pour les services
+    Route::apiResource('services', ServiceController::class)->except(['show', 'index']);
+    
     Route::get('/dashboard/stats', [DashboardController::class, 'getStats']);
     Route::get('/formateur/stats-dashboard', [DashboardController::class, 'getFormateurDashboard']);
     Route::get('/inscriptions', [InscriptionController::class, 'index']);
@@ -62,7 +57,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/cours/{id}', [CoursController::class, 'update']);
     Route::get('/apprenant/formation/{id}/contenu', [CoursController::class, 'getContenuPourApprenant']);
     Route::post('/cours/{id}/terminer', [CoursController::class, 'terminerCours']);
-    // Routes Quiz
+    
     Route::post('/formations/cours/{coursId}/quiz', [QuizController::class, 'store']); 
     Route::get('/formations/cours/{coursId}/quiz', [QuizController::class, 'show']);   
     Route::post('/quizzes/{quizId}/verifier', [QuizController::class, 'verifier']);   
@@ -73,8 +68,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/parent/enfants/inscriptions', [EnfantController::class, 'getInscriptionsEnfants']);
     Route::post('/payment/simulate-parent', [EnfantController::class, 'simulateParentPayment']);
     Route::get('/admin/transactions', [InscriptionController::class, 'getAllTransactionsAdmin']);
-
     Route::get('/admin/messages', [ContactController::class, 'index']);
     Route::put('/admin/messages/{id}/toggle-lu', [ContactController::class, 'toggleLu']);
-
 });
