@@ -84,10 +84,11 @@ const ServicesSection = () => {
                 <div className="relative h-40 w-full overflow-hidden bg-gray-100">
                   <img 
                     src={
-                      service.image && service.image.includes('127.0.0.1:8000') 
-                        ? service.image.replace('http://127.0.0.1:8000', 'https://pschool-backend.onrender.com') 
-                        : service.image
-                    } 
+                      service.image 
+                        ? service.image.replace('http://127.0.0.1:8000', 'https://pschool-backend.onrender.com')
+                                      .replace('http://pschool-backend.onrender.com', 'https://pschool-backend.onrender.com')
+                        : '/path/to/default/image.png'
+                    }
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
                     alt={service.titre}
                   />
@@ -150,10 +151,11 @@ const ServicesSection = () => {
                   <div className="w-full md:w-2/5 h-48 rounded-md overflow-hidden bg-gray-100">
                     <img 
                       src={
-                        serviceSelectionne.image && serviceSelectionne.image.includes('127.0.0.1:8000') 
-                          ? serviceSelectionne.image.replace('http://127.0.0.1:8000', 'https://pschool-backend.onrender.com') 
-                          : serviceSelectionne.image
-                      } 
+                        serviceSelectionne.image 
+                          ? serviceSelectionne.image.replace('http://127.0.0.1:8000', 'https://pschool-backend.onrender.com')
+                                        .replace('http://pschool-backend.onrender.com', 'https://pschool-backend.onrender.com')
+                          : '/path/to/default/image.png'
+                      }
                       alt={serviceSelectionne.titre} 
                       className="w-full h-full object-cover"
                     />

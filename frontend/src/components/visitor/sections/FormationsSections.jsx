@@ -88,11 +88,13 @@ const FormationsSection = () => {
               >
                 <div className="relative h-44 w-full overflow-hidden bg-gray-100">
                   <img 
-                    src={
-                      formation.image && formation.image.includes('127.0.0.1:8000') 
-                        ? formation.image.replace('http://127.0.0.1:8000', 'https://pschool-backend.onrender.com') 
-                        : formation.image
-                    } 
+                
+                      src={
+                        formation.image 
+                          ? formation.image.replace('http://127.0.0.1:8000', 'https://pschool-backend.onrender.com')
+                                          .replace('http://pschool-backend.onrender.com', 'https://pschool-backend.onrender.com')
+                          : '/path/to/default/image.png'
+                      }
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
                     alt={formation.titre}
                   />
@@ -192,11 +194,12 @@ const FormationsSection = () => {
               <div className="flex flex-col md:flex-row gap-6">
                 <div className="w-full md:w-2/5 h-48 rounded-md overflow-hidden bg-gray-100">
                   <img 
-                    src={
-                      formationSelectionnee.image && formationSelectionnee.image.includes('127.0.0.1:8000') 
-                        ? formationSelectionnee.image.replace('http://127.0.0.1:8000', 'https://pschool-backend.onrender.com') 
-                        : formationSelectionnee.image
-                    } 
+                      src={
+                        formationSelectionnee.image 
+                          ? formationSelectionnee.image.replace('http://127.0.0.1:8000', 'https://pschool-backend.onrender.com')
+                                          .replace('http://pschool-backend.onrender.com', 'https://pschool-backend.onrender.com')
+                          : '/path/to/default/image.png'
+                      }
                     alt={formationSelectionnee.titre} 
                     className="w-full h-full object-cover"
                   />
