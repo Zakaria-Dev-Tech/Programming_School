@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { HiOutlineSearch, HiOutlinePlus, HiOutlinePencil, HiOutlineTrash, HiOutlineBookOpen, HiOutlineEye, HiOutlineEyeOff } from 'react-icons/hi';
-import ModaleFormation from './ModaleFormations';
+// CORRECTION : Vérifie bien le nom du fichier (sans 's' si c'est ModaleFormation.jsx)
+import ModaleFormations from './ModaleFormations'; 
 import ConfirmationSuppression from './ConfirmationSuppression';
 import Toast from '../../../components/Toast';
 import api from '../../../services/api';
@@ -22,15 +23,14 @@ const GestionFormations = () => {
     setToast({ message, type });
   };
 
-  const hideToast = () => {
-    setToast(null);
-  };
+  const hideToast = () => setToast(null);
 
   const fetchFormations = async () => {
     try {
       setChargement(true);
-      const data = await api.get('/formations');
-      setFormations(data);
+      const response = await api.get('/formations');
+      // On s'assure de récupérer data si ton instance axios ne le fait pas automatiquement
+      setFormations(response.data || response); 
     } catch (error) {
       console.error("Erreur de chargement:", error);
       showToast("Erreur lors du chargement des formations", "error");
@@ -41,8 +41,8 @@ const GestionFormations = () => {
 
   const fetchFormateurs = async () => {
     try {
-      const data = await api.get('/formateurs');
-      setFormateurs(data);
+      const response = await api.get('/formateurs');
+      setFormateurs(response.data || response);
     } catch (error) {
       console.error("Erreur chargement formateurs:", error);
       setFormateurs([]);
@@ -63,13 +63,18 @@ const GestionFormations = () => {
 
   const handleSave = async (formData, isEdit) => {
     try {
+      const config = {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      };
+
       if (isEdit && formationSelectionnee) {
-        const id = formationSelectionnee.id; 
+        const id = formationSelectionnee.id;
+        // On ajoute le spoofing de méthode pour Laravel
         formData.append('_method', 'PUT'); 
-        await api.post(`/formations/${id}`, formData);
+        await api.post(`/formations/${id}`, formData, config);
         showToast("Formation modifiée avec succès !");
       } else {
-        await api.post('/formations', formData);
+        await api.post('/formations', formData, config);
         showToast("Formation créée avec succès !");
       }
       
@@ -77,7 +82,8 @@ const GestionFormations = () => {
       setModaleOuverte(false);
     } catch (error) {
       console.error("Erreur save:", error);
-      showToast("Une erreur est survenue lors de l'enregistrement", "error");
+      const msg = error.response?.data?.message || "Erreur lors de l'enregistrement";
+      showToast(msg, "error");
     }
   };
 
@@ -104,7 +110,7 @@ const GestionFormations = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800 tracking-tight font-heading">Gestion des Formations</h1>
-          <p className="text-gray-500 text-sm">Contrôlez la visibilité et les détails de vos programmes P.School</p>
+          <p className="text-gray-500 text-sm">Pilotez le catalogue de P.School</p>
         </div>
         <button 
           onClick={() => { setFormationSelectionnee(null); setModaleOuverte(true); }}
@@ -115,6 +121,7 @@ const GestionFormations = () => {
         </button>
       </div>
 
+      {/* Barre de recherche et filtres */}
       <div className="bg-white p-4 rounded-xl shadow-sm border mb-6 flex flex-col md:flex-row gap-4">
         <div className="flex-1 relative">
           <HiOutlineSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -158,8 +165,11 @@ const GestionFormations = () => {
                   <tr key={f.id} className="hover:bg-gray-50/50 transition-colors group">
                     <td className="p-4">
                       <div className="flex items-center gap-3">
-                        {/* Image nettoyée sans point de couleur */}
-                        <img src={f.image} className="w-12 h-12 object-cover rounded-lg border shadow-sm" alt="" />
+                        <img 
+                          src={f.image?.startsWith('http') ? f.image : 'https://via.placeholder.com/150'} 
+                          className="w-12 h-12 object-cover rounded-lg border shadow-sm" 
+                          alt="" 
+                        />
                         <div>
                           <div className="font-bold text-gray-800 line-clamp-1">{f.titre}</div>
                           <div className="text-[10px] text-gray-400 font-bold uppercase">{f.duree} • {f.public_cible}</div>
@@ -167,40 +177,30 @@ const GestionFormations = () => {
                       </div>
                     </td>
                     <td className="p-4">
-                      <span className="text-[10px] font-black text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md uppercase tracking-tight">{f.categorie}</span>
+                      <span className="text-[10px] font-black text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md uppercase">{f.categorie}</span>
                     </td>
-                    <td className="p-4 text-center text-sm font-black text-gray-700">
-                        {f.nb_modules}
-                    </td>
+                    <td className="p-4 text-center text-sm font-black text-gray-700">{f.nb_modules}</td>
                     <td className="p-4 font-black text-green-600 text-sm whitespace-nowrap">
                         {f.prix?.toLocaleString()} <span className="text-[9px]">FCFA</span>
                     </td>
-                    
                     <td className="p-4 text-center">
                       <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${
                         f.statut === 'actif' ? 'bg-green-50 text-green-600' : 'bg-gray-100 text-gray-500'
                       }`}>
-                        {f.statut === 'actif' ? (
-                          <> <HiOutlineEye className="w-3.5 h-3.5" /> Actif </>
-                        ) : (
-                          <> <HiOutlineEyeOff className="w-3.5 h-3.5" /> Inactif </>
-                        )}
+                        {f.statut === 'actif' ? <><HiOutlineEye /> Actif</> : <><HiOutlineEyeOff /> Inactif</>}
                       </span>
                     </td>
-
                     <td className="p-4 text-center">
                       <div className="flex justify-center gap-1">
                         <button 
                           onClick={() => { setFormationSelectionnee(f); setModaleOuverte(true); }}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-xl transition duration-200"
-                          title="Modifier"
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-xl transition"
                         >
                           <HiOutlinePencil className="w-5 h-5" />
                         </button>
                         <button 
                           onClick={() => { setFormationASupprimer(f); setSuppressionOuverte(true); }}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-xl transition duration-200"
-                          title="Supprimer"
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-xl transition"
                         >
                           <HiOutlineTrash className="w-5 h-5" />
                         </button>
