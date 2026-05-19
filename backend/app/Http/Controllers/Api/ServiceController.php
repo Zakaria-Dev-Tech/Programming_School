@@ -48,14 +48,14 @@ class ServiceController extends Controller
         ], 201);
     }
 
-    public function update(Request $request, $id)
-    {
-        $service = Service::findOrFail($id);
+   public function update(Request $request, $id)
+{
+    try {
+        $service = Service::findOrFail($id); // Remplace Service par ton modèle
 
         $validator = Validator::make($request->all(), [
-            'titre' => 'required|string|max:255',
+            'nom' => 'required|string|max:255',
             'description' => 'required|string',
-            'statut' => 'required|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
@@ -63,23 +63,32 @@ class ServiceController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $data = $request->except('image');
+        $data = $request->only(['nom', 'description']);
 
         if ($request->hasFile('image')) {
-            // On ne s'occupe plus de supprimer l'ancienne image locale car on passe au Cloud
-            $result = Cloudinary::upload($request->file('image')->getRealPath(), [
+            // Utilisation du helper global plus fiable
+            $uploadedFileUrl = cloudinary()->upload($request->file('image')->getRealPath(), [
                 'folder' => 'pschool/services'
-            ]);
-            $data['image'] = $result->getSecurePath();
+            ])->getSecurePath();
+            
+            $data['image'] = $uploadedFileUrl;
         }
 
         $service->update($data);
 
         return response()->json([
-            'message' => 'Service mis à jour avec succès sur le Cloud', 
+            'status' => 'success',
+            'message' => 'Service mis à jour avec succès', 
             'service' => $service
-        ]);
+        ], 200);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Erreur serveur : ' . $e->getMessage()
+        ], 500);
     }
+}
 
     public function destroy($id)
     {

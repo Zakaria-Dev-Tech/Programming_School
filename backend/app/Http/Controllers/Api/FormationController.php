@@ -62,13 +62,12 @@ public function update(Request $request, $id)
     try {
         $formation = Formation::findOrFail($id);
 
-        // 1. Utiliser $request->all() est correct ici
         $validator = Validator::make($request->all(), [
             'titre' => 'required|string|max:255',
             'description' => 'required|string',
-            'prix' => 'required', // Enlever numeric pour le test ou utiliser numeric
+            'prix' => 'required',
             'duree' => 'required|string',
-            'nb_modules' => 'required', // Enlever integer pour le test
+            'nb_modules' => 'required',
             'categorie' => 'required|string',
             'public_cible' => 'required|string',
             'statut' => 'required|in:actif,inactif', 
@@ -79,20 +78,20 @@ public function update(Request $request, $id)
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // 2. Récupérer les données validées
         $data = $request->only([
             'titre', 'description', 'prix', 'duree', 
             'nb_modules', 'categorie', 'public_cible', 'statut'
         ]);
 
-        // 3. Gestion de l'image sur Cloudinary
         if ($request->hasFile('image')) {
-            // Utilisation du helper cloudinary() plus stable sur Render
-            $result = $request->file('image')->storeOnCloudinary('pschool/formations');
-            $data['image'] = $result->getSecurePath();
+            // CORRECTION ICI : Utilisation du helper direct au lieu de la méthode sur l'objet File
+            $uploadedFileUrl = cloudinary()->upload($request->file('image')->getRealPath(), [
+                'folder' => 'pschool/formations'
+            ])->getSecurePath();
+            
+            $data['image'] = $uploadedFileUrl;
         }
 
-        // 4. Mise à jour
         $formation->update($data);
 
         return response()->json([
@@ -102,14 +101,12 @@ public function update(Request $request, $id)
         ], 200);
 
     } catch (\Exception $e) {
-        
         return response()->json([
             'status' => 'error',
             'message' => 'Erreur serveur : ' . $e->getMessage()
         ], 500);
     }
 }
-
     public function destroy($id)
     {
         $formation = Formation::find($id);

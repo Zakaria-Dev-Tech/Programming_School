@@ -41,7 +41,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/formateur/formations', [FormationController::class, 'getFormateurFormations']);
 
     Route::post('/services', [ServiceController::class, 'store']);
-    Route::put('/services/{id}', [ServiceController::class, 'update']);
+    Route::match(['post', 'put'], '/services/{id}', [ServiceController::class, 'update']);
     Route::delete('/services/{id}', [ServiceController::class, 'destroy']);
 
     Route::get('/dashboard/stats', [DashboardController::class, 'getStats']);
