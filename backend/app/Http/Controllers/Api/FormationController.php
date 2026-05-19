@@ -6,8 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Formation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class FormationController extends Controller
 {
@@ -23,7 +22,6 @@ class FormationController extends Controller
             }
             return response()->json($query->orderBy('id', 'desc')->get());
         } catch (\Exception $e) {
-            Log::error('Index error: ' . $e->getMessage());
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
@@ -31,8 +29,6 @@ class FormationController extends Controller
     public function store(Request $request)
     {
         try {
-            Log::info('Store formation - Données reçues:', $request->all());
-            
             $validator = Validator::make($request->all(), [
                 'titre' => 'required|string|max:255',
                 'description' => 'required|string',
@@ -52,19 +48,11 @@ class FormationController extends Controller
 
             $data = $request->except(['_method']);
 
-            // Upload sur Cloudinary
             if ($request->hasFile('image')) {
-                $uploadedFile = $request->file('image');
-                $upload = Cloudinary::upload($uploadedFile->getRealPath(), [
-                    'folder' => 'pschool/formations',
-                    'transformation' => [
-                        'width' => 800,
-                        'height' => 600,
-                        'crop' => 'limit'
-                    ]
-                ]);
-                $data['image'] = $upload->getSecurePath();
-                $data['public_id'] = $upload->getPublicId();
+                $file = $request->file('image');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $path = $file->storeAs('formations', $filename, 'public');
+                $data['image'] = asset('storage/' . $path);
             }
 
             $formation = Formation::create($data);
@@ -76,7 +64,6 @@ class FormationController extends Controller
             ], 201);
 
         } catch (\Exception $e) {
-            Log::error('Store error: ' . $e->getMessage());
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
@@ -84,9 +71,6 @@ class FormationController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            Log::info('Update formation - ID: ' . $id);
-            Log::info('Update formation - Données reçues:', $request->all());
-            
             $formation = Formation::find($id);
             
             if (!$formation) {
@@ -111,29 +95,19 @@ class FormationController extends Controller
 
             $data = $request->except(['_method', 'image']);
 
-            // Gestion de l'image sur Cloudinary
             if ($request->hasFile('image')) {
-                // Supprimer l'ancienne image de Cloudinary
-                if ($formation->public_id) {
-                    try {
-                        Cloudinary::destroy($formation->public_id);
-                        Log::info('Ancienne image supprimée: ' . $formation->public_id);
-                    } catch (\Exception $e) {
-                        Log::warning('Erreur suppression ancienne image: ' . $e->getMessage());
+                // Supprimer l'ancienne image
+                if ($formation->image) {
+                    $oldPath = str_replace(asset('storage/'), '', $formation->image);
+                    if (Storage::disk('public')->exists($oldPath)) {
+                        Storage::disk('public')->delete($oldPath);
                     }
                 }
                 
-                $uploadedFile = $request->file('image');
-                $upload = Cloudinary::upload($uploadedFile->getRealPath(), [
-                    'folder' => 'pschool/formations',
-                    'transformation' => [
-                        'width' => 800,
-                        'height' => 600,
-                        'crop' => 'limit'
-                    ]
-                ]);
-                $data['image'] = $upload->getSecurePath();
-                $data['public_id'] = $upload->getPublicId();
+                $file = $request->file('image');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $path = $file->storeAs('formations', $filename, 'public');
+                $data['image'] = asset('storage/' . $path);
             }
 
             $formation->update($data);
@@ -141,11 +115,10 @@ class FormationController extends Controller
             return response()->json([
                 'status' => 'success',
                 'message' => 'Mise à jour réussie', 
-                'formation' => $formation->fresh()
+                'formation' => $formation
             ], 200);
 
         } catch (\Exception $e) {
-            Log::error('Update error: ' . $e->getMessage() . ' - Trace: ' . $e->getTraceAsString());
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
@@ -154,43 +127,29 @@ class FormationController extends Controller
     {
         try {
             $formation = Formation::find($id);
-            
-            if (!$formation) {
-                return response()->json(['message' => 'Formation non trouvée'], 404);
-            }
-            
-            // Supprimer l'image de Cloudinary
-            if ($formation->public_id) {
-                try {
-                    Cloudinary::destroy($formation->public_id);
-                    Log::info('Image Cloudinary supprimée: ' . $formation->public_id);
-                } catch (\Exception $e) {
-                    Log::warning('Erreur suppression image Cloudinary: ' . $e->getMessage());
+            if ($formation) {
+                if ($formation->image) {
+                    $oldPath = str_replace(asset('storage/'), '', $formation->image);
+                    if (Storage::disk('public')->exists($oldPath)) {
+                        Storage::disk('public')->delete($oldPath);
+                    }
                 }
+                $formation->delete();
+                return response()->json(['message' => 'Supprimée avec succès'], 200);
             }
-            
-            $formation->delete();
-            
-            return response()->json(['message' => 'Formation supprimée avec succès'], 200);
-            
+            return response()->json(['message' => 'Non trouvée'], 404);
         } catch (\Exception $e) {
-            Log::error('Destroy error: ' . $e->getMessage());
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
 
     public function show($id)
     {
-        try {
-            $formation = Formation::find($id);
-            if (!$formation) {
-                return response()->json(['message' => 'Formation non trouvée'], 404);
-            }
-            return response()->json($formation, 200);
-        } catch (\Exception $e) {
-            Log::error('Show error: ' . $e->getMessage());
-            return response()->json(['message' => $e->getMessage()], 500);
+        $formation = Formation::find($id);
+        if (!$formation) {
+            return response()->json(['message' => 'Formation non trouvée'], 404);
         }
+        return response()->json($formation, 200);
     }
 
     public function getFormateurFormations()
@@ -203,7 +162,6 @@ class FormationController extends Controller
             $formations = Formation::where('formateur_id', $user->id)->get();
             return response()->json($formations, 200);
         } catch (\Exception $e) {
-            Log::error('GetFormateurFormations error: ' . $e->getMessage());
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
