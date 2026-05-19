@@ -35,6 +35,19 @@ const FormationsSection = () => {
     getFormations();
   }, []);
 
+  // Fonction pour traiter l'URL de l'image de façon sécurisée
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return 'https://via.placeholder.com/400x300?text=P.School';
+    
+    // Si c'est déjà une URL Cloudinary ou externe (https), on la laisse telle quelle
+    if (imagePath.startsWith('https://res.cloudinary.com')) return imagePath;
+
+    // Si c'est une ancienne URL locale ou HTTP, on la force en HTTPS pour Render
+    return imagePath
+      .replace('http://127.0.0.1:8000', 'https://pschool-backend.onrender.com')
+      .replace('http://pschool-backend.onrender.com', 'https://pschool-backend.onrender.com');
+  };
+
   const categories = ['Tous', ...new Set(formations.map(f => f.categorie).filter(Boolean))];
   
   const filteredFormations = filtre === 'Tous' 
@@ -53,11 +66,9 @@ const FormationsSection = () => {
           <div className="w-16 h-0.5 bg-green-600 mx-auto mt-4"></div>
           <p className="text-gray-600 max-w-2xl mx-auto mt-4">
             Des programmes conçus pour répondre aux exigences réelles du marché technologique.
-            Inscrivez vos enfants pour leur offrir un avenir meilleur.
           </p>
         </div>
         
-        {/* Filtres */}
         <div className="flex flex-wrap justify-center gap-2 mb-10">
           {categories.map(cat => (
             <button
@@ -88,13 +99,7 @@ const FormationsSection = () => {
               >
                 <div className="relative h-44 w-full overflow-hidden bg-gray-100">
                   <img 
-                
-                      src={
-                        formation.image 
-                          ? formation.image.replace('http://127.0.0.1:8000', 'https://pschool-backend.onrender.com')
-                                          .replace('http://pschool-backend.onrender.com', 'https://pschool-backend.onrender.com')
-                          : '/path/to/default/image.png'
-                      }
+                    src={getImageUrl(formation.image)} 
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
                     alt={formation.titre}
                   />
@@ -109,11 +114,9 @@ const FormationsSection = () => {
                   <span className="text-green-600 text-xs font-semibold uppercase tracking-wide">
                     {formation.categorie}
                   </span>
-                  
                   <h3 className="text-lg font-bold text-gray-800 mt-1 mb-2 line-clamp-1">
                     {formation.titre}
                   </h3>
-                  
                   <p className="text-gray-600 text-sm mb-3 line-clamp-2">
                     {formation.description}
                   </p>
@@ -136,7 +139,6 @@ const FormationsSection = () => {
                     >
                       Voir détails
                     </button>
-                    
                     <button 
                       onClick={() => navigate(`/inscription/${formation.id}`)} 
                       className="flex items-center justify-center w-8 h-8 rounded-md bg-gray-800 text-white hover:bg-green-600 transition-colors"
@@ -150,11 +152,9 @@ const FormationsSection = () => {
           </div>
         )}
 
-        {/* Section des étapes */}
+        {/* Section Fonctionnement */}
         <div className="mt-16 pt-8 border-t border-gray-200">
-          <h3 className="text-2xl font-bold text-gray-800 text-center mb-10">
-            Comment ça fonctionne ?
-          </h3>
+          <h3 className="text-2xl font-bold text-gray-800 text-center mb-10">Comment ça fonctionne ?</h3>
           <div className="grid md:grid-cols-4 gap-6">
             {steps.map((step, index) => (
               <div key={index} className="text-center">
@@ -168,85 +168,41 @@ const FormationsSection = () => {
             ))}
           </div>
         </div>
-
-        <div className="mt-12 text-center">
-          <button 
-            onClick={() => navigate('/formations')}
-            className="px-8 py-3 bg-white border border-gray-300 text-gray-700 font-medium rounded-md hover:bg-gray-50 transition-colors"
-          >
-            Voir toutes les formations
-          </button>
-        </div>
       </div>
 
-      {/* Modal de détails */}
+      {/* Modal Détails */}
       {formationSelectionnee && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 transition-opacity">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto relative p-6">
             <button 
               onClick={() => setFormationSelectionnee(null)}
-              className="absolute top-4 right-4 p-1 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors z-10"
+              className="absolute top-4 right-4 p-1 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 z-10"
             >
               <HiX className="w-5 h-5" />
             </button>
-
-            <div className="p-6">
-              <div className="flex flex-col md:flex-row gap-6">
-                <div className="w-full md:w-2/5 h-48 rounded-md overflow-hidden bg-gray-100">
-                  <img 
-                      src={
-                        formationSelectionnee.image 
-                          ? formationSelectionnee.image.replace('http://127.0.0.1:8000', 'https://pschool-backend.onrender.com')
-                                          .replace('http://pschool-backend.onrender.com', 'https://pschool-backend.onrender.com')
-                          : '/path/to/default/image.png'
-                      }
-                    alt={formationSelectionnee.titre} 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-
-                <div className="w-full md:w-3/5">
-                  <span className="text-amber-600 text-xs font-semibold uppercase tracking-wide">
-                    {formationSelectionnee.categorie}
-                  </span>
-                  <h2 className="text-xl font-bold text-gray-800 mt-1 mb-3">
-                    {formationSelectionnee.titre}
-                  </h2>
-                  <div className="bg-gray-50 px-4 py-3 rounded-md border border-gray-200 mb-4">
-                    <p className="text-xs text-gray-500 uppercase mb-1">Frais de formation</p>
-                    <div className="text-2xl font-bold text-gray-800">
-                      {Number(formationSelectionnee.prix).toLocaleString()} <span className="text-sm text-green-600">FCFA</span>
-                    </div>
-                  </div>
+            <div className="flex flex-col md:flex-row gap-6">
+              <div className="w-full md:w-2/5 h-48 rounded-md overflow-hidden bg-gray-100">
+                <img src={getImageUrl(formationSelectionnee.image)} className="w-full h-full object-cover" alt="" />
+              </div>
+              <div className="w-full md:w-3/5">
+                <span className="text-amber-600 text-xs font-semibold uppercase">{formationSelectionnee.categorie}</span>
+                <h2 className="text-xl font-bold text-gray-800 mt-1 mb-3">{formationSelectionnee.titre}</h2>
+                <div className="bg-gray-50 px-4 py-3 rounded-md border border-gray-200">
+                   <p className="text-xs text-gray-500 uppercase mb-1">Frais de formation</p>
+                   <div className="text-2xl font-bold text-gray-800">
+                     {Number(formationSelectionnee.prix).toLocaleString()} <span className="text-sm text-green-600">FCFA</span>
+                   </div>
                 </div>
               </div>
-
-              <div className="mt-6 space-y-4">
-                <div>
-                  <h4 className="font-semibold text-gray-800 mb-2">À propos de cette formation</h4>
-                  <p className="text-gray-600 text-sm leading-relaxed">
-                    {formationSelectionnee.description}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 rounded-md bg-gray-50 border border-gray-200">
-                    <p className="text-xs text-gray-500 font-medium uppercase">Durée totale</p>
-                    <p className="font-semibold text-gray-800">{formationSelectionnee.duree}</p>
-                  </div>
-                  <div className="p-3 rounded-md bg-gray-50 border border-gray-200">
-                    <p className="text-xs text-gray-500 font-medium uppercase">Contenu</p>
-                    <p className="font-semibold text-gray-800">{formationSelectionnee.nb_modules} modules</p>
-                  </div>
-                </div>
-
-                <button 
-                  onClick={() => navigate(`/inscription/${formationSelectionnee.id}`)} 
-                  className="w-full py-3 bg-green-600 text-white rounded-md font-medium hover:bg-green-700 transition-colors"
-                >
-                  S'inscrire maintenant
-                </button>
-              </div>
+            </div>
+            <div className="mt-6 space-y-4">
+              <p className="text-gray-600 text-sm leading-relaxed">{formationSelectionnee.description}</p>
+              <button 
+                onClick={() => navigate(`/inscription/${formationSelectionnee.id}`)} 
+                className="w-full py-3 bg-green-600 text-white rounded-md font-medium hover:bg-green-700"
+              >
+                S'inscrire maintenant
+              </button>
             </div>
           </div>
         </div>
