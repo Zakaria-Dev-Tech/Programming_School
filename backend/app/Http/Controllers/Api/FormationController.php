@@ -6,24 +6,33 @@ use App\Http\Controllers\Controller;
 use App\Models\Formation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class FormationController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Formation::query();
-        if ($request->get('mode') === 'vitrine') {
-            $query->where('statut', 'actif');
+        try {
+            $query = Formation::query();
+            if ($request->get('mode') === 'vitrine') {
+                $query->where('statut', 'actif');
+            }
+            if ($request->has('cible')) {
+                $query->where('public_cible', $request->cible);
+            }
+            return response()->json($query->orderBy('id', 'desc')->get());
+        } catch (\Exception $e) {
+            Log::error('Index error: ' . $e->getMessage());
+            return response()->json(['message' => $e->getMessage()], 500);
         }
-        if ($request->has('cible')) {
-            $query->where('public_cible', $request->cible);
-        }
-        return response()->json($query->orderBy('id', 'desc')->get());
     }
 
     public function store(Request $request)
     {
         try {
+            Log::info('Store formation - Données reçues:', $request->all());
+            
             $validator = Validator::make($request->all(), [
                 'titre' => 'required|string|max:255',
                 'description' => 'required|string',
@@ -41,20 +50,14 @@ class FormationController extends Controller
                 return response()->json(['errors' => $validator->errors()], 422);
             }
 
-            $data = $request->all();
+            $data = $request->except(['_method']);
 
+            // Gestion de l'image SANS Cloudinary
             if ($request->hasFile('image')) {
-                // Vérifier si cloudinary est installé
-                if (class_exists('\CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary')) {
-                    $upload = cloudinary()->upload($request->file('image')->getRealPath(), [
-                        'folder' => 'pschool/formations'
-                    ]);
-                    $data['image'] = $upload->getSecurePath();
-                } else {
-                    // Fallback: stockage local
-                    $path = $request->file('image')->store('formations', 'public');
-                    $data['image'] = asset('storage/' . $path);
-                }
+                $file = $request->file('image');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $path = $file->storeAs('formations', $filename, 'public');
+                $data['image'] = asset('storage/' . $path);
             }
 
             $formation = Formation::create($data);
@@ -66,7 +69,7 @@ class FormationController extends Controller
             ], 201);
 
         } catch (\Exception $e) {
-            \Log::error('Erreur store formation: ' . $e->getMessage());
+            Log::error('Store error: ' . $e->getMessage() . ' - Trace: ' . $e->getTraceAsString());
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
@@ -74,7 +77,14 @@ class FormationController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            $formation = Formation::findOrFail($id);
+            Log::info('Update formation - ID: ' . $id);
+            Log::info('Update formation - Données reçues:', $request->all());
+            
+            $formation = Formation::find($id);
+            
+            if (!$formation) {
+                return response()->json(['message' => 'Formation non trouvée'], 404);
+            }
 
             $validator = Validator::make($request->all(), [
                 'titre' => 'sometimes|required|string|max:255',
@@ -92,18 +102,22 @@ class FormationController extends Controller
                 return response()->json(['errors' => $validator->errors()], 422);
             }
 
-            $data = $request->except(['_method']);
+            $data = $request->except(['_method', 'image']);
 
+            // Gestion de l'image SANS Cloudinary
             if ($request->hasFile('image')) {
-                if (class_exists('\CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary')) {
-                    $upload = cloudinary()->upload($request->file('image')->getRealPath(), [
-                        'folder' => 'pschool/formations'
-                    ]);
-                    $data['image'] = $upload->getSecurePath();
-                } else {
-                    $path = $request->file('image')->store('formations', 'public');
-                    $data['image'] = asset('storage/' . $path);
+                // Supprimer l'ancienne image si elle existe
+                if ($formation->image) {
+                    $oldPath = str_replace(asset('storage/'), '', $formation->image);
+                    if (Storage::disk('public')->exists($oldPath)) {
+                        Storage::disk('public')->delete($oldPath);
+                    }
                 }
+                
+                $file = $request->file('image');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $path = $file->storeAs('formations', $filename, 'public');
+                $data['image'] = asset('storage/' . $path);
             }
 
             $formation->update($data);
@@ -115,7 +129,7 @@ class FormationController extends Controller
             ], 200);
 
         } catch (\Exception $e) {
-            \Log::error('Erreur update formation: ' . $e->getMessage());
+            Log::error('Update error: ' . $e->getMessage() . ' - Trace: ' . $e->getTraceAsString());
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
@@ -125,10 +139,18 @@ class FormationController extends Controller
         try {
             $formation = Formation::find($id);
             if ($formation) {
+                // Supprimer l'image associée
+                if ($formation->image) {
+                    $oldPath = str_replace(asset('storage/'), '', $formation->image);
+                    if (Storage::disk('public')->exists($oldPath)) {
+                        Storage::disk('public')->delete($oldPath);
+                    }
+                }
+                
                 $formation->delete();
-                return response()->json(['message' => 'Supprimée'], 200);
+                return response()->json(['message' => 'Supprimée avec succès'], 200);
             }
-            return response()->json(['message' => 'Non trouvée'], 404);
+            return response()->json(['message' => 'Formation non trouvée'], 404);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
@@ -136,11 +158,15 @@ class FormationController extends Controller
 
     public function show($id)
     {
-        $formation = Formation::find($id);
-        if (!$formation) {
-            return response()->json(['message' => 'Formation non trouvée'], 404);
+        try {
+            $formation = Formation::find($id);
+            if (!$formation) {
+                return response()->json(['message' => 'Formation non trouvée'], 404);
+            }
+            return response()->json($formation, 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 500);
         }
-        return response()->json($formation, 200);
     }
 
     public function getFormateurFormations()
