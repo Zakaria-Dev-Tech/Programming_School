@@ -36,7 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/parent/suivi-enfant/{enfantId}', [InscriptionController::class, 'getSuiviEnfant']);
     
     Route::post('/formations', [FormationController::class, 'store']);
-    Route::post('/formations/{id}', [FormationController::class, 'update']);
+    Route::match(['post', 'put'], '/formations/{id}', [FormationController::class, 'update']);
     Route::delete('/formations/{id}', [FormationController::class, 'destroy']);
     Route::get('/formateur/formations', [FormationController::class, 'getFormateurFormations']);
 
