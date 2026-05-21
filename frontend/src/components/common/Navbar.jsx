@@ -94,7 +94,7 @@ const Navbar = () => {
           <Link to="/a-propos" onClick={() => setIsOpen(false)} className="w-full py-2 border-b">À propos</Link>
           <Link to="/services" onClick={() => setIsOpen(false)} className="w-full py-2 border-b">Nos Services</Link>
           <Link to="/elearning" onClick={() => setIsOpen(false)} className="w-full py-2 ">E-learning</Link>
-          <button onClick={() => handleScrollTo('formations-programmees')} className="w-full py-2 border-b text-left">Sessions Programmées</button>
+          <button onClick={() => handleScrollTo('formationSessions')} className="w-full py-2 border-b text-left">Sessions Programmées</button>
           <button onClick={() => handleScrollTo('evenements')} className="w-full py-2 border-b text-left">Évènements</button>
           <button onClick={() => handleScrollTo('temoignages')} className="w-full py-2 border-b text-left">Témoignages</button>
           <button onClick={() => handleScrollTo('contact')} className="w-full py-2 border-b text-left">Contact</button>
