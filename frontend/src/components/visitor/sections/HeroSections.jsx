@@ -66,11 +66,11 @@ const HeroSection = () => {
                   ref={el => statsRef.current[idx] = el}
                   data-value={stat.value}
                   data-suffix={stat.suffix}
-                  className="text-2xl md:text-3xl font-black bg-gradient-to-r from-blue-500 to-blue-500 bg-clip-text text-transparent"
+                  className="text-2xl md:text-3xl font-black bg-gradient-to-r from-green-500 to-green-500 bg-clip-text text-transparent"
                 >
                   0{stat.suffix}
                 </div>
-                <div className="absolute -bottom-2 left-1/2 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-transparent group-hover:w-1/2 transition-all duration-500 -translate-x-1/2" />
+                <div className="absolute -bottom-2 left-1/2 w-0 h-0.5 bg-gradient-to-r from-green-500 to-transparent group-hover:w-1/2 transition-all duration-500 -translate-x-1/2" />
               </div>
               <div className="text-[10px] md:text-xs font-semibold text-gray-300 mt-1 md:mt-2">{stat.label}</div>
               <div className="text-[8px] text-gray-400">{stat.sub}</div>
@@ -83,7 +83,7 @@ const HeroSection = () => {
         
         {/* Titre avec animation */}
         <h2 className="text-5xl md:text-7xl font-black leading-tight animate-fade-up">
-          <span className="text-blue-300">
+          <span className="text-green-600">
             "Devenir Programmeur
           </span>
           <br />
@@ -96,7 +96,7 @@ const HeroSection = () => {
             Maîtriser l'avenir du numérique au Burkina Faso
           </p>
           <p className="text-lg text-gray-300">
-            Apprenez le Code, la Robotique et le Numérique avec <span className='text-blue-300'>PSchool</span>
+            Apprenez le Code, la Robotique , le Numérique avec <span className='text-green-600'>P.school</span>
           </p>
         </div>
         
@@ -104,7 +104,7 @@ const HeroSection = () => {
         <div className="flex flex-col sm:flex-row gap-4 mt-10 animate-fade-up animation-delay-400">
           <button 
            onClick={() => window.location.href = '/formationSessions'}
-            className="px-5 py-2 bg-blue-500 text-white text-sm font-semibold rounded-lg hover:bg-blue-600 transition"
+            className="px-5 py-2 bg-green-500 text-white text-sm font-semibold rounded-lg hover:bg-green-600 transition"
           >
             <span className="relative z-10 flex items-center gap-2">
               Découvrir nos offres de formations intensives
@@ -114,7 +114,7 @@ const HeroSection = () => {
           
           <button 
           onClick={() => window.location.href = '/services'}
-            className="group px-8 py-4 border-2 border-white/30 backdrop-blur-sm text-white font-semibold rounded-xl hover:bg-white hover:text-blue-600 transition-all duration-300 hover:border-transparent hover:shadow-xl"
+            className="group px-8 py-4 border-2 border-white/30 backdrop-blur-sm text-white font-semibold rounded-xl hover:bg-white hover:text-green-600 transition-all duration-300 hover:border-transparent hover:shadow-xl"
           >
             <span className="flex items-center gap-2">
               <HiOutlinePlay className="w-5 h-5" />
@@ -128,7 +128,7 @@ const HeroSection = () => {
       {/* Scroll indicator */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
         <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center">
-          <div className="w-1 h-2 bg-blue-500 rounded-full mt-2 animate-pulse" />
+          <div className="w-1 h-2 bg-green-500 rounded-full mt-2 animate-pulse" />
         </div>
       </div>
     </section>

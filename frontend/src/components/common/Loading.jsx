@@ -11,7 +11,7 @@ const Loading = ({ onLoadingComplete }) => {
       setTimeout(() => {
         if (onLoadingComplete) onLoadingComplete();
       }, 800);
-    }, 2500);
+    }, 3000);
 
     return () => clearTimeout(timer);
   }, [onLoadingComplete]);
@@ -22,10 +22,10 @@ const Loading = ({ onLoadingComplete }) => {
       {/* Cercle qui tourne autour du logo */}
       <div className="relative">
         {/* Cercle animé qui tourne */}
-        <div className="absolute inset-0 rounded-full border-4 border-t-blue-400 border-r-blue-400 border-b-transparent border-l-transparent animate-spin"></div>
+         {/* <div className="absolute inset-0 rounded-full border-4 border-t-blue-400 border-r-blue-400 border-b-transparent border-l-transparent animate-spin"></div>*/}
         
         {/* Cercle extérieur avec pulsation */}
-        <div className="absolute inset-0 rounded-full border-4 border-blue-200 animate-ping opacity-50"></div>
+        <div className="absolute inset-0 rounded-full border-4 border-green-500 animate-ping opacity-50"></div>
         
         {/* Logo */}
         <div className="w-28 h-28 md:w-36 md:h-36  rounded-2xl flex items-center justify-center shadow-2xl">

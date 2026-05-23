@@ -10,7 +10,7 @@ import {
   HiOutlineClipboardList,
   HiOutlineCreditCard,
   HiOutlineShieldCheck,
-
+    HiOutlineCalendar,
   HiOutlineLogout
 } from 'react-icons/hi';
 import { TiMessage } from "react-icons/ti";
@@ -67,7 +67,8 @@ const Sidebar = () => {
     { path: '/admin/utilisateurs', name: 'Utilisateurs', icon: HiOutlineUsers },
     { path: '/admin/formations', name: 'Formations', icon: HiOutlineBookOpen },
     { path: '/admin/services', name: 'Services', icon: GrServices },
-    { path: '/admin/inscriptions', name: 'Inscriptions', icon: HiOutlineClipboardList },
+    { path: '/admin/inscriptions', name: 'Inscriptions e-learning', icon: HiOutlineClipboardList },
+     { path: '/admin/inscriptions-session', name: 'Inscriptions Session', icon: HiOutlineCalendar },
     { path: '/admin/paiements', name: 'Paiements', icon: HiOutlineCreditCard },
       { path: '/admin/messages', name: 'Renseignement', icon: TiMessage },
     { path: '/admin/logs', name: 'Logs sécurité', icon: HiOutlineShieldCheck },

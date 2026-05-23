@@ -12,7 +12,7 @@ import GestionPaiements from '../../components/dashboard/admin/GestionPaiements'
 import GestionLogs from '../../components/dashboard/admin/GestionLogs';
 import GestionMessages from '../../components/dashboard/admin/GestionMessages';
 import MonProfil from '../../components/dashboard/admin/MonProfil';
-
+import GestionInscriptionsSession from '../../components/dashboard/admin/GestionInscriptionsSession';
 const AdminDashboard = () => {
   return (
     <AdminLayout title="Tableau de bord">
@@ -26,6 +26,7 @@ const AdminDashboard = () => {
         <Route path="inscriptions" element={<GestionInscriptions/>}/>
         <Route path="paiements" element={<GestionPaiements />} />
         <Route path="logs" element={<GestionLogs />} />
+        <Route path="inscriptions-session" element={<GestionInscriptionsSession />} />
         <Route path="messages" element={<GestionMessages />} />
         <Route path="profil" element={<MonProfil />} />
       </Routes>

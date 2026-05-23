@@ -27,7 +27,7 @@ Route::get('/services/{id}', [ServiceController::class, 'show']);
 Route::get('/formations', [FormationController::class, 'index']);
 Route::get('/formations/{id}', [FormationController::class, 'show']);
 Route::get('/formateurs', [AuthController::class, 'getFormateurs']);
-
+Route::post('/formations/{formationId}/inscription-session', [InscriptionSessionController::class, 'store']);
 Route::middleware('auth:sanctum')->group(function () {
    
     Route::apiResource('users', UserController::class);
@@ -78,6 +78,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/messages', [ContactController::class, 'index']);
     Route::put('/admin/messages/{id}/toggle-lu', [ContactController::class, 'toggleLu']);
 
-     Route::post('/inscriptions-sessions', [App\Http\Controllers\Api\InscriptionSessionController::class, 'store']);
-    Route::get('/mes-inscriptions-sessions', [App\Http\Controllers\Api\InscriptionSessionController::class, 'mesInscriptionsSessions']);
+     Route::get('/inscriptions-session', [InscriptionSessionController::class, 'index']);
+    Route::get('/inscriptions-session/{id}', [InscriptionSessionController::class, 'show']);
+    Route::put('/inscriptions-session/{id}/statut', [InscriptionSessionController::class, 'updateStatut']);
+    Route::delete('/inscriptions-session/{id}', [InscriptionSessionController::class, 'destroy']);
+    Route::get('/inscriptions-session/export/csv', [InscriptionSessionController::class, 'export']);
 });

@@ -53,26 +53,26 @@ const Navbar = () => {
         
         {/* MENU DESKTOP */}
         <div className="hidden md:flex items-center space-x-6 font-medium">
-          <Link to="/" className={`text-xl transition hover:text-blue-500 ${isDarkText ? 'text-gray-700' : 'text-white'}`}>Accueil</Link>
-          <Link to="/a-propos" className={`text-xl transition hover:text-blue-500 ${isDarkText ? 'text-gray-700' : 'text-white'}`}>À propos</Link>
-          <Link to="/services" className={`text-xl transition hover:text-blue-500 ${isDarkText ? 'text-gray-700' : 'text-white'}`}>Nos Services</Link>
+          <Link to="/" className={`text-xl transition hover:text-green-500 ${isDarkText ? 'text-gray-700' : 'text-white'}`}>Accueil</Link>
+          <Link to="/a-propos" className={`text-xl transition hover:text-green-500 ${isDarkText ? 'text-gray-700' : 'text-white'}`}>À propos</Link>
+          <Link to="/services" className={`text-xl transition hover:text-green-500 ${isDarkText ? 'text-gray-700' : 'text-white'}`}>Nos Services</Link>
 
           {/* DROPDOWN */}
           <div className="relative" onMouseEnter={() => setShowDropdown(true)} onMouseLeave={() => setShowDropdown(false)}>
-            <button className={`flex items-center gap-1 text-xl transition hover:text-blue-500 ${isDarkText ? 'text-gray-700' : 'text-white'}`}>
+            <button className={`flex items-center gap-1 text-xl transition hover:text-green-500 ${isDarkText ? 'text-gray-700' : 'text-white'}`}>
               Formations <HiChevronDown className={`transition-transform duration-200 ${showDropdown ? 'rotate-180' : ''}`} />
             </button>
             {showDropdown && (
               <div className="absolute top-full left-0 w-64 bg-white shadow-xl rounded-md py-2 border border-gray-100 text-gray-800">
-                <Link to="/elearning" className="block px-4 py-3 hover:bg-green-50 hover:text-blue-600 transition font-bold">E-learning</Link>
-                <Link to="/formationSessions" className="block px-4 py-3 hover:bg-green-50 hover:text-blue-600 transition font-bold">Sessions Programmées</Link>
+                <Link to="/elearning" className="block px-4 py-3 hover:bg-green-50 hover:text-green-600 transition font-bold">E-learning</Link>
+                <Link to="/formationSessions" className="block px-4 py-3 hover:bg-green-50 hover:text-green-600 transition font-bold">Sessions Programmées</Link>
               </div>
             )}
           </div>
 
-          <button onClick={() => handleScrollTo('evenements')} className={`text-xl transition hover:text-blue-500 ${isDarkText ? 'text-gray-700' : 'text-white'}`}>Évènements</button>
-          <button onClick={() => handleScrollTo('temoignages')} className={`text-xl transition hover:text-blue-500 ${isDarkText ? 'text-gray-700' : 'text-white'}`}>Témoignages</button>
-          <button onClick={() => handleScrollTo('contact')} className={`text-xl transition hover:text-blue-500 ${isDarkText ? 'text-gray-700' : 'text-white'}`}>Contact</button>
+          <button onClick={() => handleScrollTo('evenements')} className={`text-xl transition hover:text-green-500 ${isDarkText ? 'text-gray-700' : 'text-white'}`}>Évènements</button>
+          <button onClick={() => handleScrollTo('temoignages')} className={`text-xl transition hover:text-green-500 ${isDarkText ? 'text-gray-700' : 'text-white'}`}>Témoignages</button>
+          <button onClick={() => handleScrollTo('contact')} className={`text-xl transition hover:text-green-500 ${isDarkText ? 'text-gray-700' : 'text-white'}`}>Contact</button>
         </div>
 
         {/* ACTIONS */}

@@ -22,7 +22,8 @@ import AproposPage from './pages/AproposPage';
 import ServicesPage from './pages/ServicesPages';
 import FormationSessionsPage from './pages/FormationSessionsPage';
 import InscriptionFormation from './pages/InscriptionFormation';
-
+import InscriptionSessionPage from './pages/InscriptionSessionPage';
+import InscriptionSessionAdultePage from './pages/InscriptionAdultePage';
 const PublicLayout = () => {
   return (
     <div className="min-h-screen flex flex-col">
@@ -79,6 +80,8 @@ function App() {
                 path="/inscription/:formationId" 
                 element={<PrivateRoute><InscriptionFormation /></PrivateRoute>} 
               />
+              <Route path="/inscription-session/:formationId" element={<InscriptionSessionPage />} />
+              <Route path="/inscription-session-adulte/:formationId" element={<InscriptionSessionAdultePage />} />
               <Route path="/apprenant/formation/:id" element={<CoursePlayer />} />
               {/* Pages publiques avec Navbar */}
               <Route path="/*" element={<PublicLayout />} />
