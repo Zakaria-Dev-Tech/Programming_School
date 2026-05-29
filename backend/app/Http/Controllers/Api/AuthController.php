@@ -70,17 +70,19 @@ public function login(Request $request)
         return response()->json(['errors' => $validator->errors()], 422);
     }
 
-    // CORRECTION : Suppression du 'orWhere('username', ...)'
-    // On cherche uniquement par email pour les utilisateurs de la table 'users'
-    $user = User::where('email', $request->email)->first();
+    // CORRECTION : Permettre la connexion par email OU par username
+    $field = filter_var($request->email, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+    
+    $user = User::where($field, $request->email)->first();
 
     if (!$user || !Hash::check($request->password, $user->password)) {
         return response()->json(['message' => 'Email ou mot de passe incorrect'], 401);
     }
     
+    // Vérifier le statut du compte
     if ($user->statut === 'inactif') {
         return response()->json([
-            'message' => 'Votre compte  banni .Laisser nous un message pour en savoir plus'
+            'message' => 'Votre compte est désactivé. Veuillez contacter l\'administrateur.'
         ], 403);
     }
 

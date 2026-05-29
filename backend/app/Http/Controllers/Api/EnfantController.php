@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Formation;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class EnfantController extends Controller
 {
@@ -22,37 +23,63 @@ class EnfantController extends Controller
     {
         return DB::transaction(function () use ($request) {
             
-            // 1. Création du compte dans 'users'
-            $username = strtolower($request->prenom) . rand(100, 999);
+            // Validation des données
+            $validator = Validator::make($request->all(), [
+                'prenom' => 'required|string|max:255',
+                'nom' => 'required|string|max:255',
+                'age' => 'required|integer|min:3|max:18',
+                'niveau_etude' => 'required|string',
+                'nom_ecole' => 'nullable|string',
+                'localite_ecole' => 'nullable|string',
+                'formations_interet' => 'nullable|array',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+            
+            // Générer un username unique
+            $baseUsername = strtolower($request->prenom . '.' . $request->nom);
+            $username = $baseUsername;
+            $counter = 1;
+            while (User::where('username', $username)->exists()) {
+                $username = $baseUsername . $counter;
+                $counter++;
+            }
+            
+            $plainPassword = 'pschool2026';
+            
+            // Création du compte dans 'users'
             $userEnfant = User::create([
                 'nom' => $request->prenom . ' ' . $request->nom,
                 'username' => $username,
                 'email' => $username . '@pschool.ci',
-                'password' => Hash::make('pschool2026'),
+                'password' => Hash::make($plainPassword),
                 'type' => 'apprenant',
                 'role' => 'user',
                 'parent_id' => auth()->id(), 
                 'age' => $request->age,
                 'nom_ecole' => $request->nom_ecole,
                 'niveau_etude' => $request->niveau_etude,
-                'localite' => $request->localite_ecole, 
+                'localite' => $request->localite_ecole,
+                'statut' => 'actif'
             ]);
 
-            // 2. Inscription automatique aux formations d'intérêt
-            if ($request->has('formations_interet')) {
-                $formations = \App\Models\Formation::whereIn('titre', $request->formations_interet)->get();
+            // Générer un token d'accès pour l'enfant
+            $token = $userEnfant->createToken('enfant-token')->plainTextToken;
+
+            // Inscription automatique aux formations d'intérêt
+            if ($request->has('formations_interet') && !empty($request->formations_interet)) {
+                $formations = Formation::whereIn('titre', $request->formations_interet)->get();
 
                 foreach ($formations as $formation) { 
                     DB::table('inscriptions')->insert([
                         'user_id' => $userEnfant->id,
                         'formation_id' => $formation->id,
-                        'montant' => $formation->prix, // Changé selon la colonne de ta migration
+                        'montant_paye' => $formation->prix,
                         'date_inscription' => now(),
-                        
-                        // FLUX CORRIGÉ : Accès direct pour commencer l'apprentissage
                         'statut' => 'confirmee', 
                         'statut_paiement' => 'essai', 
-                        
                         'created_at' => now(),
                         'updated_at' => now(),
                     ]);
@@ -61,15 +88,45 @@ class EnfantController extends Controller
 
             return response()->json([
                 'success' => true,
+                'message' => 'Enfant inscrit avec succès',
+                'data' => $userEnfant,
                 'credentials' => [
                     'username' => $username,
-                    'password' => 'pschool2026'
+                    'password' => $plainPassword,
+                     'access_token' => $token ,
                 ]
             ], 201);
         });
     }
 
-    // NOUVEAU : Récupérer le statut financier de tous les enfants de ce parent
+    // Supprimer un enfant
+    public function destroy($id)
+    {
+        try {
+            $enfant = User::where('id', $id)
+                ->where('parent_id', auth()->id())
+                ->firstOrFail();
+            
+            // Supprimer d'abord les inscriptions de l'enfant
+            DB::table('inscriptions')->where('user_id', $enfant->id)->delete();
+            
+            // Puis supprimer l'enfant
+            $enfant->delete();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Enfant supprimé avec succès'
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la suppression'
+            ], 500);
+        }
+    }
+
+    // Récupérer le statut financier de tous les enfants de ce parent
     public function getInscriptionsEnfants()
     {
         try {
@@ -82,7 +139,7 @@ class EnfantController extends Controller
                 ->select(
                     'inscriptions.id',
                     'inscriptions.statut_paiement',
-                   'inscriptions.montant_paye as montant',
+                    'inscriptions.montant_paye as montant',
                     'users.nom as enfant_nom',
                     'formations.titre as formation_titre'
                 )
@@ -96,7 +153,7 @@ class EnfantController extends Controller
         }
     }
 
-    // NOUVEAU : Simuler l'action du guichet CinetPay pour le parent
+    // Simuler l'action du guichet CinetPay pour le parent
     public function simulateParentPayment(Request $request)
     {
         $request->validate([
@@ -104,7 +161,6 @@ class EnfantController extends Controller
         ]);
 
         try {
-            // Optionnel : tu peux vérifier ici que l'inscription appartient bien à un enfant de ce parent
             DB::table('inscriptions')
                 ->where('id', $request->inscription_id)
                 ->update([

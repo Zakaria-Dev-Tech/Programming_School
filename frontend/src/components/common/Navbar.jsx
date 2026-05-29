@@ -65,8 +65,7 @@ const Navbar = () => {
               </div>
             )}
           </div>
-
-          <button onClick={() => handleScrollTo('evenements')} className={`transition hover:text-orange-500 ${isDarkText ? 'text-gray-700' : 'text-white'}`}>Évènements</button>
+          <Link to="/evenements" className={`transition hover:text-orange-500 ${isDarkText ? 'text-gray-700' : 'text-white'}`}>Évènements</Link>
           <button onClick={() => handleScrollTo('temoignages')} className={`transition hover:text-orange-500 ${isDarkText ? 'text-gray-700' : 'text-white'}`}>Témoignages</button>
           <button onClick={() => handleScrollTo('contact')} className={`transition hover:text-orange-500 ${isDarkText ? 'text-gray-700' : 'text-white'}`}>Contact</button>
         </div>

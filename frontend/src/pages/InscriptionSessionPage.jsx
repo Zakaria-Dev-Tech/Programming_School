@@ -70,7 +70,7 @@ const InscriptionSessionPage = () => {
       await api.post(`/formations/${formationId}/inscription-session`, dataToSend);
       toast.success("Votre inscription a été enregistrée avec succès !");
       setTimeout(() => {
-        navigate('/formationsSessions');
+        navigate('/');
       }, 2000);
     } catch (error) {
       console.error("Erreur détaillée:", error.response?.data);
@@ -288,7 +288,7 @@ const InscriptionSessionPage = () => {
             <h2 className="text-lg font-semibold text-gray-800 mb-4">Choix de la session</h2>
             
             <div className="grid md:grid-cols-3 gap-4">
-              {['Juin-juillet', 'Juillet-août', 'Août-septembre'].map((session) => (
+              {['Juin-juillet', 'Juillet-août', 'Août-septembre','Novembre-Juin'].map((session) => (
                 <label key={session} className="flex items-center gap-2 p-3 border border-gray-200 rounded-md cursor-pointer hover:bg-gray-50 transition-colors">
                   <input
                     type="radio"

@@ -75,8 +75,8 @@
 }
 
 :root {
-  --swiper-navigation-color: #16a34a; /* green-600 */
-  --swiper-pagination-color: #16a34a;
+  --swiper-navigation-color: #ffffff; /* green-600 */
+  --swiper-pagination-color: #ffffff;
 }
 
 .swiper-button-next, .swiper-button-prev {
@@ -135,4 +135,20 @@
 
 .animate-pulse-slow {
   animation: pulse-slow 3s ease-in-out infinite;
+}
+/* Styles pour l'effet flip 3D */
+.perspective {
+  perspective: 1000px;
+}
+
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
 }

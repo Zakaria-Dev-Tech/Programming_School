@@ -33,7 +33,6 @@ class InscriptionSessionController extends Controller
                 'parent_adresse' => 'required|string|max:500',
                 'parent_telephone' => 'required|string|max:20',
                 'parent_zone' => 'required|string|max:255',
-                'session_choisie' => 'required|string|max:255',
                 'source' => 'nullable|string|max:255',
             ];
             
@@ -44,6 +43,7 @@ class InscriptionSessionController extends Controller
                 $rules['eleve_age'] = 'required|integer|min:3|max:18';
                 $rules['eleve_niveau_etude'] = 'required|string|max:255';
                 $rules['eleve_etablissement'] = 'required|string|max:255';
+                $rules['session_choisie'] = 'required|string|max:255';
             }
             
             // Règles spécifiques pour adulte
@@ -71,7 +71,7 @@ class InscriptionSessionController extends Controller
                 'parent_adresse' => $request->parent_adresse,
                 'parent_telephone' => $request->parent_telephone,
                 'parent_zone' => $request->parent_zone,
-                'session_choisie' => $request->session_choisie,
+               
                 'source' => $request->source,
                 'statut' => 'en_attente'
             ];
@@ -83,6 +83,7 @@ class InscriptionSessionController extends Controller
                 $data['eleve_age'] = $request->eleve_age;
                 $data['eleve_niveau_etude'] = $request->eleve_niveau_etude;
                 $data['eleve_etablissement'] = $request->eleve_etablissement;
+                $data['session_choisie'] =$request->session_choisie;
                 // Valeurs null pour les champs adulte
                 $data['apprenant_email'] = null;
                 $data['format'] = null;
@@ -93,6 +94,7 @@ class InscriptionSessionController extends Controller
                 $data['eleve_nom'] = null;
                 $data['eleve_prenom'] = null;
                 $data['eleve_age'] = null;
+                  $data['session_choisie'] = null;
                 $data['eleve_niveau_etude'] = null;
                 $data['eleve_etablissement'] = null;
             }

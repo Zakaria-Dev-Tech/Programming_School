@@ -194,7 +194,7 @@ const ElearningPage = () => {
                 onClick={() => navigate(`/inscription/${formationSelectionnee.id}`)} 
                 className="w-full py-3 bg-cyan-600 text-white rounded-md font-medium hover:bg-cyan-700"
               >
-                S'inscrire maintenant
+                Commencez gratuitement
               </button>
             </div>
           </div>

@@ -64,12 +64,10 @@ const ContactSection = () => {
         {/* En-tête */}
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-4">
-         
             <span className="text-orange-600 font-semibold text-4xl uppercase tracking-wide">
               Contactez-nous
             </span>
           </div>
-        
         </div>
 
         {/* Image à gauche + Formulaire à droite - Même hauteur */}
@@ -78,7 +76,7 @@ const ContactSection = () => {
           {/* IMAGE À GAUCHE - Pleine largeur */}
           <div 
             ref={floatingImageRef}
-            className="hidden lg:block transition-all duration-100 ease-in-out  overflow-hidden  "
+            className="hidden lg:block transition-all duration-100 ease-in-out overflow-hidden"
             style={{ transition: 'transform 0.1s linear' }}
           >
             <img 
@@ -89,7 +87,7 @@ const ContactSection = () => {
           </div>
           
           {/* FORMULAIRE À DROITE */}
-          <div className="bg-gray-50 rounded-2xl p-8 border border-gray-200 flex flex-col">
+          <div className="bg-white rounded-2xl p-8 border border-gray-200 flex flex-col">
             <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200">
               <HiOutlineChat className="w-6 h-6 text-orange-500" />
               <h3 className="text-xl font-bold text-gray-800">Envoyez-nous un message</h3>
@@ -191,70 +189,30 @@ const ContactSection = () => {
             </form>
           </div>
         </div>
+      </div>
 
-        {/* INFOS + MAPS - EN BAS */}
-        <div className="grid lg:grid-cols-2 gap-6 mt-6">
+      {/* SECTION LOCALISATION - PLEINE LARGEUR */}
+      <div className="w-full mt-16">
+        {/* Titre de la section localisation */}
+        <div className="text-center mb-8">
           
-          {/* Cartes d'info et horaires */}
-          <div className="space-y-6">
-            <div className="grid sm:grid-cols-2 gap-5">
-              <div className="group p-6 bg-gray-50 rounded-2xl border border-gray-200 hover:shadow-md hover:border-orange-200 transition-all">
-                <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-orange-500 transition-colors">
-                  <HiOutlinePhone className="w-6 h-6 text-orange-500 group-hover:text-white transition-colors" />
-                </div>
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Téléphone / WhatsApp</p>
-                <p className="text-base font-semibold text-gray-800">+226 02 88 05 82</p>
-                <p className="text-base font-semibold text-gray-800">+226 07 57 16 45</p>
-                <div className="mt-3 flex items-center gap-2">
-                  <FaWhatsapp className="w-4 h-4 text-orange-500" />
-                  <span className="text-xs text-gray-400">Réponse sous 24h</span>
-                </div>
-              </div>
-              
-              <div className="group p-6 bg-gray-50 rounded-2xl border border-gray-200 hover:shadow-md hover:border-orange-200 transition-all">
-                <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-orange-500 transition-colors">
-                  <HiOutlineMail className="w-6 h-6 text-orange-500 group-hover:text-white transition-colors" />
-                </div>
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Email</p>
-                <p className="text-base font-semibold text-gray-800">infos@pschool.pro</p>
-                <p className="text-sm text-gray-400 mt-2">Nous répondons sous 48h</p>
-              </div>
-            </div>
+        
+          <p className="text-gray-500 mt-2">
+            Secteur 53, Ouaga 2000 - Boulevard Muammar Khadafi, Ouagadougou, Burkina Faso
+          </p>
+        </div>
 
-            <div className="flex items-center gap-4 p-5 bg-gray-50 rounded-2xl border border-gray-200">
-              <div className="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
-                <HiOutlineClock className="w-5 h-5 text-orange-500" />
-              </div>
-              <div>
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Horaires d'ouverture</p>
-                <p className="text-sm text-gray-700">Lundi - Samedi : 9h00 - 17h00</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Carte Maps */}
-          <div className="bg-gray-50 rounded-2xl border border-gray-200 overflow-hidden hover:shadow-md transition-all">
-            <div className="flex items-start gap-3 p-5 border-b border-gray-200">
-              <div className="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
-                <HiOutlineLocationMarker className="w-5 h-5 text-orange-500" />
-              </div>
-              <div>
-                <p className="font-bold text-gray-800">Secteur 53, Ouaga 2000</p>
-                <p className="text-sm text-gray-500 mt-0.5">Boulevard Muammar Khadafi, Ouagadougou, Burkina Faso</p>
-              </div>
-            </div>
-            
-            <div className="h-64 w-full">
-              <iframe 
-                title="P.School Location"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3897.894746110535!2d-1.5022534251700728!3d12.322870787936061!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xe2ebd0c8acc045b%3A0x43f81f1a9af2130e!2sPROGRAMMING%20SCHOOL%20OUAGADOUGOU!5e0!3m2!1sfr!2sbf!4v1777542341593!5m2!1sfr!2sbf" 
-                className="w-full h-full"
-                style={{ border: 0 }} 
-                allowFullScreen="" 
-                loading="lazy" 
-                referrerPolicy="no-referrer-when-downgrade"
-              ></iframe>
-            </div>
+          <div className="ml-2 md:ml-4 lg:ml-8 xl:ml-8 shadow-lg overflow-hidden rounded-2xl">
+          <div className="w-full h-[450px]">
+            <iframe 
+              title="P.School Location"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3897.894746110535!2d-1.5022534251700728!3d12.322870787936061!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xe2ebd0c8acc045b%3A0x43f81f1a9af2130e!2sPROGRAMMING%20SCHOOL%20OUAGADOUGOU!5e0!3m2!1sfr!2sbf!4v1777542341593!5m2!1sfr!2sbf" 
+              className="w-full h-full"
+              style={{ border: 0 }} 
+              allowFullScreen="" 
+              loading="lazy" 
+              referrerPolicy="no-referrer-when-downgrade"
+            ></iframe>
           </div>
         </div>
       </div>

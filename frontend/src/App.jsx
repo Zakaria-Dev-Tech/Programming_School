@@ -24,6 +24,9 @@ import FormationSessionsPage from './pages/FormationSessionsPage';
 import InscriptionFormation from './pages/InscriptionFormation';
 import InscriptionSessionPage from './pages/InscriptionSessionPage';
 import InscriptionSessionAdultePage from './pages/InscriptionAdultePage';
+import EvenementsPage from './pages/EvenementsPage';
+import Galerie from './pages/Galerie';
+
 const PublicLayout = () => {
   return (
     <div className="min-h-screen flex flex-col">
@@ -35,6 +38,8 @@ const PublicLayout = () => {
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/formationSessions" element={<FormationSessionsPage />} />
           <Route path="/elearning" element={<ElearningPage />} />
+         <Route path="/evenements" element={<EvenementsPage />} />
+        <Route path="/galerie" element={<Galerie />} />
         </Routes>
       </main>
       <Footer />

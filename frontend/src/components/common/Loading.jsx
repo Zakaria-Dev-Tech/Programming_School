@@ -11,24 +11,24 @@ const Loading = ({ onLoadingComplete }) => {
       setTimeout(() => {
         if (onLoadingComplete) onLoadingComplete();
       }, 800);
-    }, 3000);
+    }, 2000);
 
     return () => clearTimeout(timer);
   }, [onLoadingComplete]);
 
   return (
-    <div className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-white transition-all duration-800 ${fadeOut ? 'opacity-0 scale-105' : 'opacity-100 scale-100'}`}>
+    <div className={`fixed inset-0 z-50 flex flex-col items-center justify-center  transition-all duration-800 ${fadeOut ? 'opacity-0 scale-105' : 'opacity-100 scale-100'}`}>
       
       {/* Cercle qui tourne autour du logo */}
       <div className="relative">
         {/* Cercle animé qui tourne */}
-         {/* <div className="absolute inset-0 rounded-full border-4 border-t-blue-400 border-r-blue-400 border-b-transparent border-l-transparent animate-spin"></div>*/}
+          <div className="absolute inset-0 rounded-full border-4 border-t-blue-400 border-r-blue-400 border-b-transparent border-l-transparent animate-spin"></div>
         
         {/* Cercle extérieur avec pulsation */}
-        <div className="absolute inset-0 rounded-full border-4 border-green-500 animate-ping opacity-50"></div>
+           {/* <div className="absolute inset-0 rounded-full border-4 border-cyan-500 animate-ping opacity-50"></div>*/}
         
         {/* Logo */}
-        <div className="w-28 h-28 md:w-36 md:h-36  rounded-2xl flex items-center justify-center shadow-2xl">
+        <div className="w-28 h-28 md:w-36 md:h-36  rounded-2xl flex items-center justify-center ">
           <img 
             src={logo} 
             alt="Logo Programming School" 
@@ -38,9 +38,7 @@ const Loading = ({ onLoadingComplete }) => {
       </div>
       
       {/* Programming School */}
-      <p className="text-sm md:text-base text-gray-600 font-semibold tracking-wide mt-6">
-        Programming School
-      </p>
+      
       
     </div>
   );

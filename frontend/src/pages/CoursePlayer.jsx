@@ -74,7 +74,7 @@ const CoursePlayer = () => {
   // On autorise tout si payé, sinon uniquement les 3 premiers chapitres (index 0, 1, 2)
   const verifierAccesChapitre = (indexChapitre) => {
     if (data.statut_paiement === 'paye') return true;
-    if (data.statut_paiement === 'essai' && indexChapitre < 3) return true;
+    if (data.statut_paiement === 'essai' && indexChapitre < 2) return true;
     return false;
   };
 
