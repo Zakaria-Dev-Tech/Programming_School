@@ -146,9 +146,9 @@ navigate(target, { replace: true });
               />
               <span className="ml-2 text-sm text-gray-600">Se souvenir de moi</span>
             </label>
-            <Link to="/forgot-password" className="text-sm text-green-600 hover:text-green-700 font-medium">
-              Mot de passe oublié ?
-            </Link>
+           <Link to="/forgot-password" className="text-sm text-green-600 hover:text-green-700">
+            Mot de passe oublié ?
+          </Link>
           </div>
 
           {/* Bouton de connexion */}

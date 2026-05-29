@@ -25,7 +25,7 @@ const EvenementsPage = () => {
         {/* En-tête */}
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-3">
-            Événements passés
+            Événements
           </h1>
           <p className="text-gray-500 max-w-2xl mx-auto">
             Cliquez sur une carte pour découvrir les détails

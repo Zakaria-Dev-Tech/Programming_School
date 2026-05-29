@@ -128,7 +128,7 @@ const ContactSection = () => {
                     value={formData.email}
                     onChange={handleChange}
                     className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all"
-                    placeholder="votre@email.com"
+                    placeholder="EX : nom@email.com"
                   />
                 </div>
               </div>

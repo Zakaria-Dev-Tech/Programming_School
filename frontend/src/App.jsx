@@ -3,6 +3,8 @@ import { Toaster } from 'react-hot-toast';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 
+import ForgotPassword from './pages/auth/ForgotPassword';
+import ResetPassword from './pages/auth/ResetPassword';
 import Loading from './components/common/Loading';
 import Navbar from './components/common/Navbar';
 import Footer from './components/common/footer';
@@ -90,6 +92,9 @@ function App() {
               <Route path="/apprenant/formation/:id" element={<CoursePlayer />} />
               {/* Pages publiques avec Navbar */}
               <Route path="/*" element={<PublicLayout />} />
+
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
             </Routes>
           </AuthProvider>
         </Router>

@@ -47,7 +47,6 @@ const Register = () => {
       if (name === 'conditions') {
         setFormData({ ...formData, conditions: checked });
       } else {
-        // Gestion des cases à cocher pour les formations
         const currentList = [...formData.formations_interet];
         const updatedList = checked 
           ? [...currentList, value] 
@@ -80,7 +79,6 @@ const Register = () => {
         password_confirmation: formData.password_confirmation,
       };
 
-      // On n'envoie les formations que si c'est un apprenant adulte
       if (typeCompte === 'apprenant') {
         dataToSend.formations_interet = formData.formations_interet;
       }
@@ -100,125 +98,195 @@ const Register = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl w-full">
-        <div className="text-center mb-8">
-          <img src="/assets/logo-removebg-preview (1).png" alt="Logo" className="h-20 mx-auto" />
-          <h2 className="text-3xl font-bold text-gray-800 mt-4">Créer un compte</h2>
-          <p className="text-gray-500 mt-2 text-sm">Rejoignez la plateforme d'apprentissage P.School</p>
-        </div>
-
-        {errors.global && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2 text-red-600">
-            <HiOutlineExclamationCircle className="h-5 w-5" />
-            <p className="text-sm font-medium">{errors.global}</p>
-          </div>
-        )}
-
-        <div className="bg-white rounded-3xl shadow-xl p-6 md:p-10 border border-gray-100">
-          {/* SÉLECTEUR DE TYPE DE COMPTE */}
-          <div className="mb-8">
-            <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 text-center">Choisissez votre profil</label>
-            <div className="grid grid-cols-2 gap-4">
-              <button 
-                type="button" 
-                onClick={() => setTypeCompte('apprenant')} 
-                className={`py-4 px-4 rounded-2xl font-bold transition-all border-2 ${typeCompte === 'apprenant' ? 'border-green-600 bg-green-50 text-green-700 shadow-md' : 'border-gray-100 bg-gray-50 text-gray-400 hover:border-gray-200'}`}
-              >
-                Apprenant Adulte
-              </button>
-              <button 
-                type="button" 
-                onClick={() => setTypeCompte('parent')} 
-                className={`py-4 px-4 rounded-2xl font-bold transition-all border-2 ${typeCompte === 'parent' ? 'border-green-600 bg-green-50 text-green-700 shadow-md' : 'border-gray-100 bg-gray-50 text-gray-400 hover:border-gray-200'}`}
-              >
-                Parent d'élève
-              </button>
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+          {/* Dégradé décoratif en haut */}
+          <div className="h-2 bg-gradient-to-r from-blue-600 to-green-500"></div>
+          
+          {/* Logo et titre */}
+          <div className="px-8 pt-8 text-center">
+            <div className="flex justify-center mb-4">
+              <img 
+                src="/assets/logo.png" 
+                alt="Programming School Logo" 
+                className="h-28 w-auto"
+                onError={(e) => { e.target.style.display = 'none' }}
+              />
             </div>
+            <h2 className="text-2xl font-bold text-gray-800">Créer un compte</h2>
+            <p className="text-gray-500 text-sm mt-1">Rejoignez la plateforme d'apprentissage P.School</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            
-            {/* CHAMPS COMMUNS */}
-            <div className="space-y-1">
-              <label className="text-sm font-semibold text-gray-700">Nom Complet</label>
-              <div className="relative">
-                <HiOutlineUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input type="text" name="nom" value={formData.nom} onChange={handleChange} className="w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition-all" placeholder="Ex: Kader Sore" required />
-              </div>
+          {errors.global && (
+            <div className="mx-8 mt-6 p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2 text-red-600">
+              <HiOutlineExclamationCircle className="h-5 w-5" />
+              <p className="text-sm font-medium">{errors.global}</p>
             </div>
+          )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="text-sm font-semibold text-gray-700">Email</label>
-                <div className="relative">
-                  <HiOutlineMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input type="email" name="email" value={formData.email} onChange={handleChange} className="w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition-all" placeholder="votre@email.com" required />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <label className="text-sm font-semibold text-gray-700">Téléphone</label>
-                <PhoneInput
-                  country={'bf'}
-                  value={formData.telephone}
-                  onChange={phone => setFormData({ ...formData, telephone: phone })}
-                  inputClass="!w-full !py-6 !border-gray-200 !rounded-xl"
-                  containerClass="!w-full"
-                />
-              </div>
-            </div>
-
-            {/* SECTION CONDITIONNELLE : FORMATIONS ADULTES */}
-            {typeCompte === 'apprenant' ? (
-              <div className="pt-4 animate-fadeIn">
-                <label className="text-sm font-bold text-gray-700 mb-3 block">Quelles formations vous intéressent ?</label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {formationsAdultes.map(f => (
-                    <label key={f.value} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${formData.formations_interet.includes(f.value) ? 'border-green-500 bg-green-50 shadow-sm' : 'border-gray-100 hover:bg-gray-50'}`}>
-                      <input type="checkbox" name="formations_interet" value={f.value} checked={formData.formations_interet.includes(f.value)} onChange={handleChange} className="w-4 h-4 accent-green-600 rounded" />
-                      <span className="text-sm text-gray-600 font-medium">{f.label}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              /* INFO PARENT */
-              <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100 flex gap-3 animate-fadeIn">
-                <HiOutlineInformationCircle className="h-6 w-6 text-blue-500 shrink-0" />
-                <p className="text-xs text-blue-700 leading-relaxed">
-                  En tant que <strong>Parent</strong>, vous pourrez inscrire vos enfants et choisir leurs formations (Robotique, Programmation,jeu vidéo  etc.) directement depuis votre espace personnel après l'inscription.
-                </p>
-              </div>
-            )}
-
-            {/* SÉCURITÉ */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-              <div className="relative">
-                <HiOutlineLockClosed className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input type={showPassword ? 'text' : 'password'} name="password" placeholder="Mot de passe" value={formData.password} onChange={handleChange} className="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none" required />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
-                  {showPassword ? <HiOutlineEyeOff /> : <HiOutlineEye />}
+          <div className="p-8 pt-6">
+            {/* SÉLECTEUR DE TYPE DE COMPTE */}
+            <div className="mb-6">
+              <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 text-center">Choisissez votre profil</label>
+              <div className="grid grid-cols-2 gap-3">
+                <button 
+                  type="button" 
+                  onClick={() => setTypeCompte('apprenant')} 
+                  className={`py-3 px-4 rounded-xl font-semibold transition-all border-2 ${typeCompte === 'apprenant' ? 'border-green-600 bg-green-50 text-green-700' : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'}`}
+                >
+                  Apprenant Adulte
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => setTypeCompte('parent')} 
+                  className={`py-3 px-4 rounded-xl font-semibold transition-all border-2 ${typeCompte === 'parent' ? 'border-green-600 bg-green-50 text-green-700' : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'}`}
+                >
+                  Parent d'élève
                 </button>
               </div>
-              <div className="relative">
-                <HiOutlineLockClosed className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input type={showConfirmPassword ? 'text' : 'password'} name="password_confirmation" placeholder="Confirmer" value={formData.password_confirmation} onChange={handleChange} className="w-full pl-10 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none" required />
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              
+              {/* CHAMPS COMMUNS */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nom complet</label>
+                <div className="relative">
+                  <HiOutlineUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <input 
+                    type="text" 
+                    name="nom" 
+                    value={formData.nom} 
+                    onChange={handleChange} 
+                    className="w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent transition" 
+                    placeholder="Nom et Prénom" 
+                    required 
+                  />
+                </div>
               </div>
-            </div>
 
-            <div className="flex items-center gap-3 pt-2">
-              <input type="checkbox" name="conditions" checked={formData.conditions} onChange={handleChange} className="w-5 h-5 accent-green-600 rounded border-gray-300" required />
-              <label className="text-xs text-gray-500 leading-tight">
-                J'accepte les <Link to="/conditions" className="text-green-600 font-bold underline">conditions générales</Link> et la politique de confidentialité de P.School.
-              </label>
-            </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <div className="relative">
+                    <HiOutlineMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <input 
+                      type="email" 
+                      name="email" 
+                      value={formData.email} 
+                      onChange={handleChange} 
+                      className="w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent transition" 
+                      placeholder="Ex : nomprenom@gmail.com" 
+                      required 
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+                  <PhoneInput
+                    country={'bf'}
+                    value={formData.telephone}
+                    onChange={phone => setFormData({ ...formData, telephone: phone })}
+                    inputClass="!w-full !py-3 !border-gray-200 !rounded-xl !focus:ring-2 !focus:ring-green-600"
+                    containerClass="!w-full"
+                  />
+                </div>
+              </div>
 
-            <button type="submit" disabled={loading} className={`w-full py-4 rounded-2xl font-bold text-white shadow-lg transition-all ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700 active:scale-95 shadow-green-200'}`}>
-              {loading ? 'Création du compte...' : "S'inscrire maintenant"}
-            </button>
+              {/* SECTION CONDITIONNELLE : FORMATIONS ADULTES */}
+              {typeCompte === 'apprenant' ? (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Quelles formations vous intéressent ?</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto border border-gray-200 rounded-xl p-3">
+                    {formationsAdultes.map(f => (
+                      <label key={f.value} className={`flex items-center gap-3 p-2 rounded-lg border cursor-pointer transition-all ${formData.formations_interet.includes(f.value) ? 'border-green-500 bg-green-50' : 'border-gray-100 hover:bg-gray-50'}`}>
+                        <input 
+                          type="checkbox" 
+                          name="formations_interet" 
+                          value={f.value} 
+                          checked={formData.formations_interet.includes(f.value)} 
+                          onChange={handleChange} 
+                          className="w-4 h-4 text-green-600 rounded border-gray-300 focus:ring-green-500" 
+                        />
+                        <span className="text-sm text-gray-600">{f.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="p-4 bg-blue-50 rounded-xl border border-blue-100 flex gap-3">
+                  <HiOutlineInformationCircle className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />
+                  <p className="text-xs text-blue-700 leading-relaxed">
+                    En tant que <strong>Parent</strong>, vous pourrez inscrire vos enfants et choisir leurs formations (Robotique, Programmation, jeu vidéo, etc.) directement depuis votre espace personnel après l'inscription.
+                  </p>
+                </div>
+              )}
 
-            <p className="text-center text-sm text-gray-600">
-              Déjà un compte ? <Link to="/login" className="font-bold text-green-600 hover:underline">Connectez-vous</Link>
-            </p>
-          </form>
+              {/* SÉCURITÉ */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="relative">
+                  <HiOutlineLockClosed className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <input 
+                    type={showPassword ? 'text' : 'password'} 
+                    name="password" 
+                    placeholder="Mot de passe" 
+                    value={formData.password} 
+                    onChange={handleChange} 
+                    className="w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent transition" 
+                    required 
+                  />
+                  <button 
+                    type="button" 
+                    onClick={() => setShowPassword(!showPassword)} 
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPassword ? <HiOutlineEyeOff className="w-5 h-5" /> : <HiOutlineEye className="w-5 h-5" />}
+                  </button>
+                </div>
+                <div className="relative">
+                  <HiOutlineLockClosed className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <input 
+                    type={showConfirmPassword ? 'text' : 'password'} 
+                    name="password_confirmation" 
+                    placeholder="Confirmer" 
+                    value={formData.password_confirmation} 
+                    onChange={handleChange} 
+                    className="w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent transition" 
+                    required 
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <input 
+                  type="checkbox" 
+                  name="conditions" 
+                  checked={formData.conditions} 
+                  onChange={handleChange} 
+                  className="w-4 h-4 text-green-600 rounded border-gray-300 focus:ring-green-500" 
+                  required 
+                />
+                <label className="text-xs text-gray-500">
+                  J'accepte les <Link to="/conditions" className="text-green-600 hover:underline font-medium">conditions générales</Link> et la politique de confidentialité de P.School.
+                </label>
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={loading} 
+                className={`w-full py-3 rounded-xl font-semibold text-white transition-all duration-200 ${
+                  loading 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'bg-green-600 hover:bg-green-700 hover:shadow-lg active:scale-95'
+                }`}
+              >
+                {loading ? 'Création du compte...' : "S'inscrire maintenant"}
+              </button>
+
+              <p className="text-center text-sm text-gray-600">
+                Déjà un compte ? <Link to="/login" className="font-semibold text-green-600 hover:underline">Connectez-vous</Link>
+              </p>
+            </form>
+          </div>
         </div>
       </div>
     </div>

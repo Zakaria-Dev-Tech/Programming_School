@@ -14,11 +14,16 @@ use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\CoursController;
 use App\Http\Controllers\Api\QuizController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\PasswordResetController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/auth/login-badge', [AuthController::class, 'loginBadge']);
 Route::post('/contact', [ContactController::class, 'store']);
+
+   Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink']);
+Route::post('/reset-password', [PasswordResetController::class, 'resetPassword']);
+
 // routes/api.php
 Route::get('/formations/{id}/contenu', [CoursController::class, 'getContenuFormation'])
      ->middleware('auth:sanctum');
@@ -83,4 +88,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/inscriptions-session/{id}/statut', [InscriptionSessionController::class, 'updateStatut']);
     Route::delete('/inscriptions-session/{id}', [InscriptionSessionController::class, 'destroy']);
     Route::get('/inscriptions-session/export/csv', [InscriptionSessionController::class, 'export']);
+
+ 
 });

@@ -67,6 +67,7 @@ const Navbar = () => {
           </div>
           <Link to="/evenements" className={`transition hover:text-orange-500 ${isDarkText ? 'text-gray-700' : 'text-white'}`}>Évènements</Link>
           <button onClick={() => handleScrollTo('temoignages')} className={`transition hover:text-orange-500 ${isDarkText ? 'text-gray-700' : 'text-white'}`}>Témoignages</button>
+           <button onClick={() => handleScrollTo('faq')} className={`transition hover:text-orange-500 ${isDarkText ? 'text-gray-700' : 'text-white'}`}>FAQ</button>
           <button onClick={() => handleScrollTo('contact')} className={`transition hover:text-orange-500 ${isDarkText ? 'text-gray-700' : 'text-white'}`}>Contact</button>
         </div>
 
@@ -93,6 +94,7 @@ const Navbar = () => {
           <Link to="/formationSessions" onClick={() => setIsOpen(false)} className="w-full py-2 border-b text-gray-800 hover:text-orange-500">Sessions Programmées</Link>
           <button onClick={() => handleScrollTo('evenements')} className="w-full py-2 border-b text-left text-gray-800 hover:text-orange-500">Évènements</button>
           <button onClick={() => handleScrollTo('temoignages')} className="w-full py-2 border-b text-left text-gray-800 hover:text-orange-500">Témoignages</button>
+          <button onClick={() => handleScrollTo('faq')} className={`transition hover:text-orange-500 ${isDarkText ? 'text-gray-700' : 'text-white'}`}>FAQ</button>
           <button onClick={() => handleScrollTo('contact')} className="w-full py-2 border-b text-left text-gray-800 hover:text-orange-500">Contact</button>
         </div>
       </div>

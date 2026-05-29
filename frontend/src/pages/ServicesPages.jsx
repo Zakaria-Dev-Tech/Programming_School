@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FaWhatsapp, FaArrowRight, FaEnvelope, FaCode, FaRobot, FaCloud, FaShieldAlt, FaMobileAlt, FaDatabase } from 'react-icons/fa';
+import { FaWhatsapp, FaArrowRight, FaEnvelope  } from 'react-icons/fa';
 import { HiX } from 'react-icons/hi';
 import api from '../services/api';
 
@@ -8,16 +8,7 @@ const ServicesPage = () => {
   const [loading, setLoading] = useState(true);
   const [serviceSelectionne, setServiceSelectionne] = useState(null);
 
-  const getServiceIcon = (titre) => {
-    const titreLower = titre?.toLowerCase() || '';
-    if (titreLower.includes('web')) return <FaCode className="text-2xl" />;
-    if (titreLower.includes('ia') || titreLower.includes('intelligence')) return <FaRobot className="text-2xl" />;
-    if (titreLower.includes('cloud')) return <FaCloud className="text-2xl" />;
-    if (titreLower.includes('sécurité')) return <FaShieldAlt className="text-2xl" />;
-    if (titreLower.includes('mobile')) return <FaMobileAlt className="text-2xl" />;
-    return <FaDatabase className="text-2xl" />;
-  };
-
+ 
   useEffect(() => {
     const fetchServices = async () => {
       try {
@@ -53,7 +44,7 @@ const ServicesPage = () => {
         <div className="mb-12">
           <div className="relative flex items-center justify-center">
             
-            <span className="inline-flex items-center gap-2 px-6 py-2 mx-4  rounded-full text-cyan-600 font-semibold text-4xl uppercase tracking-wide bg-white shadow-sm">
+            <span className="inline-flex items-center gap-2 px-6 py-2 mx-4  text-blue-900 font-semibold text-4xl uppercase tracking-wide ">
         
               Nos prestations
            
@@ -66,7 +57,7 @@ const ServicesPage = () => {
 
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16 gap-3">
-            <div className="w-10 h-10 border-3 border-gray-200 border-t-cyan-500 rounded-full animate-spin"></div>
+            <div className="w-10 h-10 border-3 border-gray-200 border-t-blue-500 rounded-full animate-spin"></div>
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -77,10 +68,10 @@ const ServicesPage = () => {
                   <div className={`absolute top-0 left-0 w-1 h-full ${getColorClass(service.color)}`}></div>
                 </div>
                 <div className="p-5">
-                  <div className="text-cyan-600 mb-3">{getServiceIcon(service.titre)}</div>
+               
                   <h3 className="text-lg font-bold text-gray-900 mb-2">{service.titre}</h3>
                   <p className="text-gray-500 text-sm mb-4 line-clamp-3">{service.description}</p>
-                  <button onClick={() => setServiceSelectionne(service)} className="text-cyan-600 text-sm font-medium inline-flex items-center gap-1 hover:gap-2 transition-all">
+                  <button onClick={() => setServiceSelectionne(service)} className="text-blue-900 text-sm font-medium inline-flex items-center gap-1 hover:gap-2 transition-all">
                     En savoir plus <FaArrowRight className="text-xs" />
                   </button>
                 </div>
@@ -97,9 +88,7 @@ const ServicesPage = () => {
               {/* Header avec bouton fermeture */}
               <div className="flex justify-between items-center p-6 border-b border-gray-100">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-cyan-100 rounded-lg flex items-center justify-center">
-                    {getServiceIcon(serviceSelectionne.titre)}
-                  </div>
+                 
                   <h2 className="text-2xl font-bold text-gray-900">{serviceSelectionne.titre}</h2>
                 </div>
                 <button 
@@ -137,15 +126,15 @@ const ServicesPage = () => {
                       <h4 className="font-semibold text-gray-900 mb-2">Pourquoi choisir ce service ?</h4>
                       <ul className="space-y-2 text-sm text-gray-600">
                         <li className="flex items-center gap-2">
-                          <span className="w-1.5 h-1.5 bg-cyan-500 rounded-full"></span>
+                          <span className="w-1.5 h-1.5 bg-blue-900 rounded-full"></span>
                           Expertise reconnue au Burkina Faso
                         </li>
                         <li className="flex items-center gap-2">
-                          <span className="w-1.5 h-1.5 bg-cyan-500 rounded-full"></span>
+                          <span className="w-1.5 h-1.5 bg-blue-900 rounded-full"></span>
                           Équipe de professionnels certifiés
                         </li>
                         <li className="flex items-center gap-2">
-                          <span className="w-1.5 h-1.5 bg-cyan-500 rounded-full"></span>
+                          <span className="w-1.5 h-1.5 bg-blue-900 rounded-full"></span>
                           Support et accompagnement personnalisé
                         </li>
                       </ul>
@@ -167,15 +156,16 @@ const ServicesPage = () => {
                     <span>Contacter via WhatsApp</span>
                   </a>
                   <button 
-                    onClick={() => { 
-                      setServiceSelectionne(null); 
-                      scrollToContact(); 
-                    }} 
-                    className="flex items-center justify-center gap-2 py-3 bg-cyan-600 text-white rounded-xl font-semibold hover:bg-cyan-700 transition-colors"
-                  >
-                    <FaEnvelope className="text-base" /> 
-                    <span>Demander un devis</span>
-                  </button>
+                  onClick={() => { 
+                    setServiceSelectionne(null);
+                    // Rediriger vers la page d'accueil avec l'ancre #contact
+                    window.location.href = '/';
+                  }} 
+                  className="flex items-center justify-center gap-2 py-3 bg-blue-900 text-white rounded-xl font-semibold hover:bg-cyan-700 transition-colors"
+                >
+                  <FaEnvelope className="text-base" /> 
+                  <span>Demander un devis</span>
+                </button>
                 </div>
                 <p className="text-center text-xs text-gray-400 mt-4">
                   Réponse sous 24h garantie

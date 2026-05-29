@@ -9,6 +9,7 @@ use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\Notifications\CustomResetPassword;
 
 class User extends Authenticatable
 {
@@ -86,4 +87,8 @@ class User extends Authenticatable
         return $this->belongsToMany(Formation::class, 'inscriptions', 'user_id', 'formation_id')
                     ->withTimestamps(); // Optionnel : si ta table pivot a des dates
     }
+    public function sendPasswordResetNotification($token)
+{
+    $this->notify(new CustomResetPassword($token));
+}
 }

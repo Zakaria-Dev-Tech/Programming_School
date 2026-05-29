@@ -1,4 +1,5 @@
 import HeroSections from './sections/HeroSections';
+import QuestionSections from './sections/QuestionSections';
 
 import ContactSections from './sections/ContactSections';
 import TemoignagesSections from './sections/TemoignagesSections';
@@ -18,6 +19,9 @@ const Vitrine = () => {
         <TemoignagesSections />
       </div>
 
+     <div id="faq">
+        <QuestionSections />
+      </div>
 
       {/* Section Contact */}
       <div id="contact">
